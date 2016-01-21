@@ -29,9 +29,48 @@ namespace KFlyTelemetry
      * Private members
      ********************************/
 
+    void KFlyTelemetry::executeCallbacks(const std::vector<uint8_t> &payload)
+    {
+        /* Execute callbacks. */
+        std::lock_guard<std::mutex> locker(_id_cblock);
+
+        for (auto &cb : callbacks)
+            cb.second(payload);
+    }
 
     /*********************************
      * Public members
      ********************************/
 
+    KFlyTelemetry::KFlyTelemetry()
+    {
+        /* Initialize the ID counter. */
+        _id = 0;
+    }
+
+    KFlyTelemetry::~KFlyTelemetry()
+    {
+    }
+
+    unsigned int KFlyTelemetry::registerCallback(kfly_callback callback)
+    {
+        std::lock_guard<std::mutex> locker(_id_cblock);
+
+        /* Add the callback to the list. */
+        callbacks.emplace(_id, callback);
+
+        return _id++;
+    }
+
+    bool KFlyTelemetry::unregisterCallback(const unsigned int id)
+    {
+        std::lock_guard<std::mutex> locker(_id_cblock);
+
+        /* Delete the callback with correct ID. */
+        if (callbacks.erase(id) > 0)
+            return true;
+        else
+            /* No match, return false. */
+            return false;
+    }
 }

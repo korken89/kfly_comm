@@ -53,28 +53,15 @@ private:
      *
      * @param[in] payload   The payload to be sent.
      */
-    void executeCallbacks(const std::vector<uint8_t> &payload)
-    {
-        /* Execute callbacks. */
-        std::lock_guard<std::mutex> locker(_id_cblock);
-
-        for (auto &cb : callbacks)
-            cb.second(payload);
-    }
+    void executeCallbacks(const std::vector<uint8_t> &payload);
 
 public:
     /**
      * @brief
      */
-    KFlyTelemetry()
-    {
-        /* Initialize the ID counter. */
-        _id = 0;
-    }
+    KFlyTelemetry();
 
-    ~KFlyTelemetry()
-    {
-    }
+    ~KFlyTelemetry();
 
     /**
      * @brief   Register a callback.
@@ -84,16 +71,7 @@ public:
      *
      * @return  Return the ID of the callback, is used for unregistration.
      */
-    unsigned int registerCallback(kfly_callback callback)
-    {
-        std::lock_guard<std::mutex> locker(_id_cblock);
-
-        /* Add the callback to the list. */
-        //callbacks.emplace_back(kfly_callback_holder(_id, callback));
-        callbacks.emplace(_id, callback);
-
-        return _id++;
-    }
+    unsigned int registerCallback(kfly_callback callback);
 
     /**
      * @brief   Unregister a callback from the queue.
@@ -102,17 +80,7 @@ public:
      *
      * @return  Return true if the ID was deleted.
      */
-    bool unregisterCallback(const unsigned int id)
-    {
-        std::lock_guard<std::mutex> locker(_id_cblock);
-
-        /* Delete the callback with correct ID. */
-        if (callbacks.erase(id) > 0)
-            return true;
-        else
-            /* No match, return false. */
-            return false;
-    }
+    bool unregisterCallback(const unsigned int id);
 
 };
 
