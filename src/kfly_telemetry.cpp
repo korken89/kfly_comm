@@ -19,8 +19,9 @@
 ****************************************************************************/
 
 #include <iostream>
+#include "cppSLIP/slip.h"
+#include "SerialPipe/serialpipe.h"
 #include "KFlyTelemetry/kfly_telemetry.h"
-
 
 namespace KFlyTelemetry
 {

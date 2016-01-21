@@ -30,8 +30,7 @@ flags = [
     '-isystem', '/usr/local/include',
     '-isystem', '/usr/include',
     '-isystem', '/usr/include/eigen3',
-    '-I', './lib/SerialPipe',
-    '-I', './lib/cppSLIP',
+    '-I', './lib',
     '-I', 'include',
     '-I.'
 ]

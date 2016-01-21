@@ -38,7 +38,7 @@ set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
 if (catkin_FOUND)
     catkin_package(
         DEPENDS pthread
-        INCLUDE_DIRS ${catkin_INCLUDE_DIRS} include
+        INCLUDE_DIRS ${catkin_INCLUDE_DIRS} include lib
         LIBRARIES ${PROJECT_NAME}
     )
 endif()
@@ -47,7 +47,8 @@ endif()
 # Library linking and source
 ########################################
 include_directories(${catkin_INCLUDE_DIRS}
-                    include)
+                    include
+                    lib)
 
 add_library(${PROJECT_NAME}
             src/kfly_telemetry.cpp)
