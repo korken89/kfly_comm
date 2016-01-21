@@ -43,7 +43,7 @@ private:
     std::mutex _id_cblock;
 
     /** @brief Vector holding the registered callbacks. */
-    std::map<unsigned int, slip_callback> callbacks;
+    std::map<unsigned int, kfly_callback> callbacks;
 
     /** @brief ID counter for the removal of subscriptions. */
     unsigned int _id;
@@ -84,12 +84,12 @@ public:
      *
      * @return  Return the ID of the callback, is used for unregistration.
      */
-    unsigned int registerCallback(slip_callback callback)
+    unsigned int registerCallback(kfly_callback callback)
     {
         std::lock_guard<std::mutex> locker(_id_cblock);
 
         /* Add the callback to the list. */
-        //callbacks.emplace_back(slip_callback_holder(_id, callback));
+        //callbacks.emplace_back(kfly_callback_holder(_id, callback));
         callbacks.emplace(_id, callback);
 
         return _id++;
