@@ -24,7 +24,7 @@ cmake_minimum_required(VERSION 2.8.3)
 # Project name
 ########################################
 project(kflytelemetry)
-find_package(catkin REQUIRED)
+find_package(catkin QUIET)
 
 ########################################
 # Enable C++11 and other C++ flags
@@ -34,11 +34,14 @@ set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
 ########################################
 # catkin requirements
 ########################################
-catkin_package(
-    DEPENDS pthread
-    INCLUDE_DIRS ${catkin_INCLUDE_DIRS} include
-    LIBRARIES ${PROJECT_NAME}
-)
+
+if (catkin_FOUND)
+    catkin_package(
+        DEPENDS pthread
+        INCLUDE_DIRS ${catkin_INCLUDE_DIRS} include
+        LIBRARIES ${PROJECT_NAME}
+    )
+endif()
 
 ########################################
 # Library linking and source
@@ -49,9 +52,14 @@ include_directories(${catkin_INCLUDE_DIRS}
 add_library(${PROJECT_NAME}
             src/kfly_telemetry.cpp)
 
-add_dependencies(${PROJECT_NAME}
-                 ${${PROJECT_NAME}_EXPORTED_TARGETS}
-                 ${catkin_EXPORTED_TARGETS})
+
+if (catkin_FOUND)
+
+    add_dependencies(${PROJECT_NAME}
+                     ${${PROJECT_NAME}_EXPORTED_TARGETS}
+                     ${catkin_EXPORTED_TARGETS})
+
+endif ()
 
 target_link_libraries(${PROJECT_NAME}
                       ${catkin_LIBRARIES})
