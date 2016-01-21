@@ -29,6 +29,10 @@
 /* Threading includes */
 #include <mutex>
 
+/* Library includes */
+#include "cppSLIP/slip.h"
+#include "SerialPipe/serialpipe.h"
+
 namespace KFlyTelemetry
 {
 
@@ -48,6 +52,8 @@ private:
     /** @brief ID counter for the removal of subscriptions. */
     unsigned int _id;
 
+    SLIP::SLIP _slip_parser;
+
     /**
      * @brief   Calls all the registered callbacks with the data payload.
      *
@@ -55,6 +61,7 @@ private:
      */
     void executeCallbacks(const std::vector<uint8_t> &payload);
 
+    void ParseKFlyPacket(const std::vector<uint8_t> &payload);
 public:
     /**
      * @brief
@@ -82,6 +89,9 @@ public:
      */
     bool unregisterCallback(const unsigned int id);
 
+    void parse(const uint8_t data);
+
+    void parse(const std::vector<uint8_t> &payload);
 };
 
 } // namespace KFlyTelemetry

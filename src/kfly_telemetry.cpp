@@ -19,8 +19,6 @@
 ****************************************************************************/
 
 #include <iostream>
-#include "cppSLIP/slip.h"
-#include "SerialPipe/serialpipe.h"
 #include "KFlyTelemetry/kfly_telemetry.h"
 
 namespace KFlyTelemetry
@@ -38,14 +36,25 @@ namespace KFlyTelemetry
             cb.second(payload);
     }
 
+    void KFlyTelemetry::ParseKFlyPacket(const std::vector<uint8_t> &payload)
+    {
+        (void) payload;
+    }
+
     /*********************************
      * Public members
      ********************************/
 
-    KFlyTelemetry::KFlyTelemetry()
+    KFlyTelemetry::KFlyTelemetry() : _slip_parser()
     {
         /* Initialize the ID counter. */
         _id = 0;
+
+        /* Register the KFly packet parser to the SLIP output. */
+        _slip_parser.registerCallback([&] (const std::vector<uint8_t> &payload)
+        {
+            this->ParseKFlyPacket(payload);
+        });
     }
 
     KFlyTelemetry::~KFlyTelemetry()
@@ -72,5 +81,16 @@ namespace KFlyTelemetry
         else
             /* No match, return false. */
             return false;
+    }
+
+    void KFlyTelemetry::parse(const uint8_t data)
+    {
+        (void) data;
+    }
+
+    void KFlyTelemetry::parse(const std::vector<uint8_t> &payload)
+    {
+        for (auto &data : payload)
+            parse(data);
     }
 }
