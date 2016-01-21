@@ -1,0 +1,8 @@
+[submodule "lib/cppSLIP"]
+	path = lib/cppSLIP
+	url = https://gitlab.com/korken89/cppSLIP.git
+	branch = master
+[submodule "lib/SerialPipe"]
+	path = lib/SerialPipe
+	url = https://gitlab.com/korken89/SerialPipe.git
+	branch = master
