@@ -51,7 +51,8 @@ include_directories(${catkin_INCLUDE_DIRS}
                     lib)
 
 add_library(${PROJECT_NAME}
-            src/kfly_telemetry.cpp)
+            src/kfly_telemetry.cpp
+            src/crc.cpp)
 
 
 if (catkin_FOUND)
