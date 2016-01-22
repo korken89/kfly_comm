@@ -41,6 +41,12 @@ namespace KFlyTelemetry
         (void) payload;
     }
 
+    void KFlyTelemetry::generatePacket(const KFly_Command cmd,
+            const std::vector<uint8_t> &payload)
+    {
+        (void) cmd;
+        (void) payload;
+    }
     /*********************************
      * Public members
      ********************************/
