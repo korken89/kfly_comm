@@ -33,6 +33,9 @@
 #include "cppSLIP/slip.h"
 #include "SerialPipe/serialpipe.h"
 
+/* KFly includes */
+#include "KFlyTelemetry/kfly_commands.h"
+
 namespace KFlyTelemetry
 {
 
@@ -62,6 +65,9 @@ private:
     void executeCallbacks(const std::vector<uint8_t> &payload);
 
     void ParseKFlyPacket(const std::vector<uint8_t> &payload);
+
+    void generatePacket(const KFly_Command cmd,
+            const std::vector<uint8_t> &payload);
 public:
     /**
      * @brief
