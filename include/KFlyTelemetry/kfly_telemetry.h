@@ -31,7 +31,6 @@
 
 /* Library includes */
 #include "cppSLIP/slip.h"
-#include "SerialPipe/serialpipe.h"
 
 /* KFly includes */
 #include "KFlyTelemetry/kfly_commands.h"
