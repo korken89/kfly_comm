@@ -27,22 +27,44 @@ namespace KFlyTelemetry
      * Private members
      ********************************/
 
-    void KFlyTelemetry::executeCallbacks(const std::vector<uint8_t> &payload)
+    void KFlyTelemetry::executeCallbacks(KFly_Command cmd,
+                                         const std::vector<uint8_t> &payload)
     {
         /* Execute callbacks. */
         std::lock_guard<std::mutex> locker(_id_cblock);
 
         for (auto &cb : callbacks)
-            cb.second(payload);
+            cb.second(cmd, payload);
     }
 
     void KFlyTelemetry::ParseKFlyPacket(const std::vector<uint8_t> &payload)
     {
-        (void) payload;
+        unsigned int expected_size = (unsigned int) payload[0];
+        unsigned int length = payload.size();
+        uint16_t crc = payload[length - 2] | (payload[length - 1] >> 8);
+
+        std::vector<uint8_t> data(payload);
+        data.pop_back();
+        data.pop_back();
+
+        if (expected_size + 2 != length)
+        {
+            /* Size error. */
+            return;
+        }
+        else if (CRC16_CCITT::generateCRC(data) != crc)
+        {
+            /* CRC error. */
+            return;
+        }
+        else
+        {
+
+        }
     }
 
     void KFlyTelemetry::generatePacket(const KFly_Command cmd,
-            const std::vector<uint8_t> &payload)
+                                       const std::vector<uint8_t> &payload)
     {
         (void) cmd;
         (void) payload;
@@ -51,11 +73,8 @@ namespace KFlyTelemetry
      * Public members
      ********************************/
 
-    KFlyTelemetry::KFlyTelemetry() : _slip_parser()
+    KFlyTelemetry::KFlyTelemetry() : _id(0), _slip_parser()
     {
-        /* Initialize the ID counter. */
-        _id = 0;
-
         /* Register the KFly packet parser to the SLIP output. */
         _slip_parser.registerCallback([&] (const std::vector<uint8_t> &payload)
         {
@@ -91,12 +110,15 @@ namespace KFlyTelemetry
 
     void KFlyTelemetry::parse(const uint8_t data)
     {
-        (void) data;
+        std::lock_guard<std::mutex> locker(_slip_lock);
+
+        _slip_parser.parse(data);
     }
 
     void KFlyTelemetry::parse(const std::vector<uint8_t> &payload)
     {
-        for (auto &data : payload)
-            parse(data);
+        std::lock_guard<std::mutex> locker(_slip_lock);
+
+        _slip_parser.parse(payload);
     }
 }

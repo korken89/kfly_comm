@@ -34,12 +34,14 @@
 
 /* KFly includes */
 #include "KFlyTelemetry/kfly_commands.h"
+#include "KFlyTelemetry/crc.h"
 
 namespace KFlyTelemetry
 {
 
 /** @brief Definition of the message callback. */
-typedef std::function<void(const std::vector<uint8_t> &)> kfly_callback;
+typedef std::function<void(KFly_Command cmd,
+                           const std::vector<uint8_t> &)> kfly_callback;
 
 class KFlyTelemetry
 {
@@ -55,13 +57,15 @@ private:
     unsigned int _id;
 
     SLIP::SLIP _slip_parser;
+    std::mutex _slip_lock;
 
     /**
      * @brief   Calls all the registered callbacks with the data payload.
      *
      * @param[in] payload   The payload to be sent.
      */
-    void executeCallbacks(const std::vector<uint8_t> &payload);
+    void executeCallbacks(KFly_Command cmd,
+                          const std::vector<uint8_t> &payload);
 
     void ParseKFlyPacket(const std::vector<uint8_t> &payload);
 
