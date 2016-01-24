@@ -626,8 +626,15 @@ struct ControllerData : BasePayloadStruct
         float P_gain, I_gain, I_limit;
     } yaw_controller;
 
-    ControllerData()
+    ControllerData(KFlyTelemetry::KFly_Command cmd)
     {
+        if ((id == KFlyTelemetry::KFly_Command::SetRateControllerData) ||
+            (id == KFlyTelemetry::KFly_Command::SetAttitudeControllerData))
+        {
+            id = cmd;
+        }
+        else
+            throw std::invalid_argument( "Not a valid command" );
     }
 
     /**
