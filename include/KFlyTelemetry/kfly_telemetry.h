@@ -25,6 +25,7 @@
 #include <vector>
 #include <cstdint>
 #include <map>
+#include <memory>
 
 /* Threading includes */
 #include <mutex>
@@ -34,14 +35,15 @@
 
 /* KFly includes */
 #include "KFlyTelemetry/kfly_commands.h"
+#include "KFlyTelemetry/kfly_payloads.h"
 #include "KFlyTelemetry/crc.h"
 
 namespace KFlyTelemetry
 {
 
 /** @brief Definition of the message callback. */
-typedef std::function<void(KFly_Command cmd,
-                           const std::vector<uint8_t> &)> kfly_callback;
+typedef std::function<void(
+const std::shared_ptr<KFlyTelemetryPayload::BasePayloadStruct>)> &kfly_callback;
 
 class KFlyTelemetry
 {
@@ -64,10 +66,13 @@ private:
      *
      * @param[in] payload   The payload to be sent.
      */
-    void executeCallbacks(KFly_Command cmd,
-                          const std::vector<uint8_t> &payload);
+    void executeCallbacks(
+       const std::shared_ptr<KFlyTelemetryPayload::BasePayloadStruct> &payload);
 
-    void ParseKFlyPacket(const std::vector<uint8_t> &payload);
+    void parseKFlyPacket(const std::vector<uint8_t> &payload);
+
+    std::shared_ptr<KFlyTelemetryPayload::BasePayloadStruct>
+        payloadToStruct(const std::vector<uint8_t> &payload);
 
     void generatePacket(const KFly_Command cmd,
             const std::vector<uint8_t> &payload);

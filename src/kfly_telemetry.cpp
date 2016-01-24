@@ -18,7 +18,6 @@
 *
 ****************************************************************************/
 
-#include <iostream>
 #include "KFlyTelemetry/kfly_telemetry.h"
 
 namespace KFlyTelemetry
@@ -27,19 +26,19 @@ namespace KFlyTelemetry
      * Private members
      ********************************/
 
-    void KFlyTelemetry::executeCallbacks(KFly_Command cmd,
-                                         const std::vector<uint8_t> &payload)
+    void KFlyTelemetry::executeCallbacks(
+        const std::shared_ptr<KFlyTelemetryPayload::BasePayloadStruct> &payload)
     {
         /* Execute callbacks. */
         std::lock_guard<std::mutex> locker(_id_cblock);
 
         for (auto &cb : callbacks)
-            cb.second(cmd, payload);
+            cb.second(payload);
     }
 
-    void KFlyTelemetry::ParseKFlyPacket(const std::vector<uint8_t> &payload)
+    void KFlyTelemetry::parseKFlyPacket(const std::vector<uint8_t> &payload)
     {
-        unsigned int expected_size = (unsigned int) payload[0];
+        unsigned int expected_size = (unsigned int) payload[1];
         unsigned int length = payload.size();
         uint16_t crc = payload[length - 2] | (payload[length - 1] >> 8);
 
@@ -59,7 +58,9 @@ namespace KFlyTelemetry
         }
         else
         {
-
+            /* Send payload to further processing. */
+            auto data = payloadToStruct(payload);
+            executeCallbacks(data);
         }
     }
 
@@ -69,6 +70,8 @@ namespace KFlyTelemetry
         (void) cmd;
         (void) payload;
     }
+
+
     /*********************************
      * Public members
      ********************************/
@@ -78,7 +81,7 @@ namespace KFlyTelemetry
         /* Register the KFly packet parser to the SLIP output. */
         _slip_parser.registerCallback([&] (const std::vector<uint8_t> &payload)
         {
-            this->ParseKFlyPacket(payload);
+            this->parseKFlyPacket(payload);
         });
     }
 
