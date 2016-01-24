@@ -22,6 +22,7 @@
 #define _KFLY_PAYLOADS_H
 
 #include <cstdint>
+#include <ctime>
 #include <string>
 #include <vector>
 #include <stdexcept>
@@ -30,36 +31,48 @@
 namespace KFlyTelemetryPayload
 {
 
+/* @brief   Union for converting between float and bytes. */
 union floatConvert
 {
     float f;
     uint8_t b[4];
 };
 
+/* @brief   Union for converting between uint32_t and bytes. */
 union u32Convert
 {
     uint32_t u32;
     uint8_t b[4];
 };
 
+/* @brief   Union for converting between int32_t and bytes. */
 union i32Convert
 {
     uint32_t i32;
     uint8_t b[4];
 };
 
+/* @brief   Union for converting between uint16_t and bytes. */
 union u16Convert
 {
     uint16_t u16;
     uint8_t b[2];
 };
 
+/* @brief   Union for converting between int16_t and bytes. */
 union i16Convert
 {
     int16_t i16;
     uint8_t b[2];
 };
 
+/**
+ * @brief Converts 4 bytes to a float.
+ *
+ * @param[in] data  The array of bytes.
+ *
+ * @return The converted float.
+ */
 static float bytes2float(const uint8_t data[4])
 {
     /* Conversion union */
@@ -71,6 +84,12 @@ static float bytes2float(const uint8_t data[4])
     return b2f.f;
 }
 
+/**
+ * @brief Converts a float to 4 bytes.
+ *
+ * @param[in]  f    The float to be converted.
+ * @param[out] data The array of converted bytes.
+ */
 static void float2bytes(const float f, uint8_t data[4])
 {
     /* Conversion union */
@@ -82,6 +101,13 @@ static void float2bytes(const float f, uint8_t data[4])
         data[i] = f2b.b[i];
 }
 
+/**
+ * @brief Converts 4 bytes to a uint32_t.
+ *
+ * @param[in] data  The array of bytes to be converted.
+ *
+ * @return The converted uint32_t.
+ */
 static uint32_t bytes2u32(const uint8_t data[4])
 {
     /* Conversion union */
@@ -93,6 +119,12 @@ static uint32_t bytes2u32(const uint8_t data[4])
     return c.u32;
 }
 
+/**
+ * @brief Converts a uint32_t to 4 bytes.
+ *
+ * @param[in]  u32  The uint32_t to be converted.
+ * @param[out] data The array of converted bytes.
+ */
 static void u322bytes(const uint32_t u32, uint8_t data[4])
 {
     /* Conversion union */
@@ -104,6 +136,13 @@ static void u322bytes(const uint32_t u32, uint8_t data[4])
         data[i] = c.b[i];
 }
 
+/**
+ * @brief Converts 4 bytes to a int32_t.
+ *
+ * @param[in] data  The array of bytes to be converted.
+ *
+ * @return The converted int32_t.
+ */
 static int32_t bytes2i32(const uint8_t data[4])
 {
     /* Conversion union */
@@ -115,6 +154,12 @@ static int32_t bytes2i32(const uint8_t data[4])
     return c.i32;
 }
 
+/**
+ * @brief Converts a int32_t to 4 bytes.
+ *
+ * @param[in]  i32  The int32_t to be converted.
+ * @param[out] data The array of converted bytes.
+ */
 static void i322bytes(const int32_t i32, uint8_t data[4])
 {
     /* Conversion union */
@@ -126,7 +171,14 @@ static void i322bytes(const int32_t i32, uint8_t data[4])
         data[i] = c.b[i];
 }
 
-static uint16_t bytes2u16(const uint8_t data[4])
+/**
+ * @brief Converts 2 bytes to a uint16_t.
+ *
+ * @param[in] data  The array of bytes to be converted.
+ *
+ * @return The converted uint16_t.
+ */
+static uint16_t bytes2u16(const uint8_t data[2])
 {
     /* Conversion union */
     u16Convert c;
@@ -137,7 +189,13 @@ static uint16_t bytes2u16(const uint8_t data[4])
     return c.u16;
 }
 
-static void u162bytes(const uint16_t u16, uint8_t data[4])
+/**
+ * @brief Converts a uint16_t to 2 bytes.
+ *
+ * @param[in]  u16  The uint16_t to be converted.
+ * @param[out] data The array of converted bytes.
+ */
+static void u162bytes(const uint16_t u16, uint8_t data[2])
 {
     /* Conversion union */
     u16Convert c;
@@ -148,7 +206,14 @@ static void u162bytes(const uint16_t u16, uint8_t data[4])
         data[i] = c.b[i];
 }
 
-static int16_t bytes2i16(const uint8_t data[4])
+/**
+ * @brief Converts 2 bytes to a int16_t.
+ *
+ * @param[in] data  The array of bytes to be converted.
+ *
+ * @return The converted int16_t.
+ */
+static int16_t bytes2i16(const uint8_t data[2])
 {
     /* Conversion union */
     i16Convert c;
@@ -159,7 +224,13 @@ static int16_t bytes2i16(const uint8_t data[4])
     return c.i16;
 }
 
-static void i162bytes(const int16_t i16, uint8_t data[4])
+/**
+ * @brief Converts a int16_t to 2 bytes.
+ *
+ * @param[in]  i16  The int16_t to be converted.
+ * @param[out] data The array of converted bytes.
+ */
+static void i162bytes(const int16_t i16, uint8_t data[2])
 {
     /* Conversion union */
     i16Convert c;
@@ -174,16 +245,16 @@ static void i162bytes(const int16_t i16, uint8_t data[4])
 enum class FlightMode : uint8_t
 {
     /* @brief Control each motor individually. */
-    MOTOR_DIRECT_MODE,
+    MOTOR_DIRECT_MODE = 1,
 
     /* @brief Control each motor through the mixing matrix. */
-    MOTOR_INDIRECT_MODE,
+    MOTOR_INDIRECT_MODE = 2,
 
     /* @brief Control via rate references. */
-    RATE_MODE,
+    RATE_MODE = 3,
 
     /* @brief Control via attitude references. */
-    ATTITUDE_MODE
+    ATTITUDE_MODE = 4
 };
 
 /* @brief Port selector, select from the USB or the UART ports.  */
@@ -269,7 +340,20 @@ struct GetRunningMode : BasePayloadStruct
     /* @brief 'B' for bootloader, 'P' for program. */
     char sel;
 
-    GetRunningMode(const std::vector<uint8_t> &payload) : sel(payload[2]) {}
+    /**
+     * @brief Converts a payload vector to a proper struct.
+     *
+     * @param[in] payload   The payload from the KFly including header.
+     */
+    GetRunningMode(const std::vector<uint8_t> &payload)
+    {
+        if (payload.size() < 3)
+            throw std::invalid_argument( "Payload too small" );
+        else
+        {
+            sel = payload[3];
+        }
+    }
 };
 
 /* @brief Manage the subscriptions to messages. */
@@ -281,8 +365,47 @@ struct ManageSubscription : BasePayloadStruct
     /* @brief Command to subscribe to. */
     KFlyTelemetry::KFly_Command cmd;
 
+    /* @brief Selector for subscribe or unsubscribe. */
+    bool subscribe;
+
     /* @brief Milliseconds between publishes, curretly no event option. */
     uint32_t delta_ms;
+
+    ManageSubscription(Ports port, KFlyTelemetry::KFly_Command cmd,
+                       bool subscribe, uint32_t delta_ms) :
+        port(port), cmd(cmd), subscribe(subscribe), delta_ms(delta_ms)
+    {
+        id = KFlyTelemetry::KFly_Command::ManageSubscriptions;
+    }
+
+    /**
+     * @brief  Converts the structure to a byte string that KFly can parse.
+     *
+     * @return The vector containing the byte string.
+     */
+    const std::vector<uint8_t> toPayload(void)
+    {
+        /* Scratchpad for the byte converter. */
+        uint8_t scratch[4];
+
+        /* Create the vector and allocate the area needed. */
+        std::vector<uint8_t> payload;
+        payload.reserve(7);
+
+        /* Add the payload. */
+        payload.emplace_back( static_cast<uint8_t>( port ) );
+        payload.emplace_back( static_cast<uint8_t>( cmd ) );
+
+        if (subscribe)
+            payload.emplace_back( 1 );
+        else
+            payload.emplace_back( 0 );
+
+        u322bytes(delta_ms, scratch);
+        payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+        return payload;
+    }
 };
 
 /* @brief Version strings and unique identifiers. */
@@ -300,6 +423,11 @@ struct GetDeviceInfo : BasePayloadStruct
     /* @brief User ID string. */
     std::string user_string;
 
+    /**
+     * @brief Converts a payload vector to a proper struct.
+     *
+     * @param[in] payload   The payload from the KFly including header.
+     */
     GetDeviceInfo(const std::vector<uint8_t> &payload)
     {
         if (payload.size() < 17)
@@ -332,6 +460,29 @@ struct SetDeviceID : BasePayloadStruct
 {
     /* @brief Value of the user ID string. */
     std::string user_string;
+
+    SetDeviceID(std::string user_string) : user_string(user_string)
+    {
+        id = KFlyTelemetry::KFly_Command::SetDeviceID;
+    }
+
+    /**
+     * @brief  Converts the structure to a byte string that KFly can parse.
+     *
+     * @return The vector containing the byte string.
+     */
+    const std::vector<uint8_t> toPayload(void)
+    {
+        /* Create the vector and allocate the area needed. */
+        std::vector<uint8_t> payload;
+        payload.reserve(user_string.size());
+
+        /* Add the payload. */
+        for (char c : user_string)
+            payload.emplace_back( static_cast<uint8_t>( c ) );
+
+        return payload;
+    }
 };
 
 /* @brief All limits in the control system. */
@@ -361,6 +512,16 @@ struct ControllerLimits : BasePayloadStruct
         float horizontal, vertical;
     } max_velocity;
 
+    ControllerLimits()
+    {
+        id = KFlyTelemetry::KFly_Command::SetControllerLimits;
+    }
+
+    /**
+     * @brief Converts a payload vector to a proper struct.
+     *
+     * @param[in] payload   The payload from the KFly including header.
+     */
     ControllerLimits(const std::vector<uint8_t> &payload)
     {
         if (payload.size() != 42)
@@ -394,6 +555,54 @@ struct ControllerLimits : BasePayloadStruct
             max_velocity.vertical = bytes2float( &payload[i] );
         }
     }
+
+    /**
+     * @brief  Converts the structure to a byte string that KFly can parse.
+     *
+     * @return The vector containing the byte string.
+     */
+    const std::vector<uint8_t> toPayload(void)
+    {
+        /* Scratchpad for the byte converter. */
+        uint8_t scratch[4];
+
+        /* Create the vector and allocate the area needed. */
+        std::vector<uint8_t> payload;
+        payload.reserve(40);
+
+        /* Add the payload. */
+        float2bytes(max_rate.roll, scratch);
+        payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+        float2bytes(max_rate.pitch, scratch);
+        payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+        float2bytes(max_rate.yaw, scratch);
+        payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+        float2bytes(max_rate_attitude.roll, scratch);
+        payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+        float2bytes(max_rate_attitude.pitch, scratch);
+        payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+        float2bytes(max_rate_attitude.yaw, scratch);
+        payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+        float2bytes(max_angle.roll, scratch);
+        payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+        float2bytes(max_angle.pitch, scratch);
+        payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+        float2bytes(max_velocity.horizontal, scratch);
+        payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+        float2bytes(max_velocity.vertical, scratch);
+        payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+        return payload;
+    }
 };
 
 /* @brief Generic controller data structure. */
@@ -417,6 +626,15 @@ struct ControllerData : BasePayloadStruct
         float P_gain, I_gain, I_limit;
     } yaw_controller;
 
+    ControllerData()
+    {
+    }
+
+    /**
+     * @brief Converts a payload vector to a proper struct.
+     *
+     * @param[in] payload   The payload from the KFly including header.
+     */
     ControllerData(const std::vector<uint8_t> &payload)
     {
         if (payload.size() != 38)
@@ -447,6 +665,51 @@ struct ControllerData : BasePayloadStruct
             yaw_controller.I_limit = bytes2float( &payload[i] );
         }
     }
+
+    /**
+     * @brief  Converts the structure to a byte string that KFly can parse.
+     *
+     * @return The vector containing the byte string.
+     */
+    const std::vector<uint8_t> toPayload(void)
+    {
+        /* Scratchpad for the byte converter. */
+        uint8_t scratch[4];
+
+        /* Create the vector and allocate the area needed. */
+        std::vector<uint8_t> payload;
+        payload.reserve(36);
+
+        /* Add the payload. */
+        float2bytes(roll_controller.P_gain, scratch);
+        payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+        float2bytes(roll_controller.I_gain, scratch);
+        payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+        float2bytes(roll_controller.I_limit, scratch);
+        payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+        float2bytes(pitch_controller.P_gain, scratch);
+        payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+        float2bytes(pitch_controller.I_gain, scratch);
+        payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+        float2bytes(pitch_controller.I_limit, scratch);
+        payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+        float2bytes(yaw_controller.P_gain, scratch);
+        payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+        float2bytes(yaw_controller.I_gain, scratch);
+        payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+        float2bytes(yaw_controller.I_limit, scratch);
+        payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+        return payload;
+    }
 };
 
 /* @brief Affine channel mixing matrix. */
@@ -458,6 +721,16 @@ struct ChannelMix : BasePayloadStruct
     /* @brief Offset of the outputs, used for servos. */
     float offset[8];
 
+    ChannelMix()
+    {
+        id = KFlyTelemetry::KFly_Command::SetChannelMix;
+    }
+
+    /**
+     * @brief Converts a payload vector to a proper struct.
+     *
+     * @param[in] payload   The payload from the KFly including header.
+     */
     ChannelMix(const std::vector<uint8_t> &payload)
     {
         if (payload.size() != 162)
@@ -485,6 +758,42 @@ struct ChannelMix : BasePayloadStruct
             }
         }
     }
+
+    /**
+     * @brief  Converts the structure to a byte string that KFly can parse.
+     *
+     * @return The vector containing the byte string.
+     */
+    const std::vector<uint8_t> toPayload(void)
+    {
+        /* Scratchpad for the byte converter. */
+        uint8_t scratch[4];
+
+        /* Create the vector and allocate the area needed. */
+        std::vector<uint8_t> payload;
+        payload.reserve(160);
+
+        /* Add the payload. */
+
+        /* Weights. */
+        for (int j = 0; j < 8; j++)
+        {
+            for (int k = 0; k < 4; k++)
+            {
+                float2bytes(weights[j][k], scratch);
+                payload.insert(payload.end(), &scratch[0], &scratch[4]);
+            }
+        }
+
+        /* Offset. */
+        for (int j = 0; j < 8; j++)
+        {
+            float2bytes(offset[j], scratch);
+            payload.insert(payload.end(), &scratch[0], &scratch[4]);
+        }
+
+        return payload;
+    }
 };
 
 /* @brief Calibration structure for the RC inputs. */
@@ -508,6 +817,16 @@ struct RCCalibration : BasePayloadStruct
     /* @brief The bottom value of the RC input (generally around 1000). */
     uint16_t ch_bottom[12];
 
+    RCCalibration()
+    {
+        id = KFlyTelemetry::KFly_Command::SetRCCalibration;
+    }
+
+    /**
+     * @brief Converts a payload vector to a proper struct.
+     *
+     * @param[in] payload   The payload from the KFly including header.
+     */
     RCCalibration(const std::vector<uint8_t> &payload)
     {
         if (payload.size() != 102)
@@ -550,6 +869,58 @@ struct RCCalibration : BasePayloadStruct
                 i += 2;
             }
         }
+    }
+
+    /**
+     * @brief  Converts the structure to a byte string that KFly can parse.
+     *
+     * @return The vector containing the byte string.
+     */
+    const std::vector<uint8_t> toPayload(void)
+    {
+        /* Scratchpad for the byte converter. */
+        uint8_t scratch[4];
+
+        /* Create the vector and allocate the area needed. */
+        std::vector<uint8_t> payload;
+        payload.reserve(100);
+
+        /* Add the payload. */
+
+        u322bytes(static_cast<uint32_t>( mode ), scratch);
+        payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+        for (int j = 0; j < 12; j++)
+        {
+            u162bytes(static_cast<uint16_t>( role[j] ), scratch);
+            payload.insert(payload.end(), &scratch[0], &scratch[2]);
+        }
+
+        for (int j = 0; j < 12; j++)
+        {
+            u162bytes(static_cast<uint16_t>( type[j] ), scratch);
+            payload.insert(payload.end(), &scratch[0], &scratch[2]);
+        }
+
+        for (int j = 0; j < 12; j++)
+        {
+            u162bytes(ch_top[j], scratch);
+            payload.insert(payload.end(), &scratch[0], &scratch[2]);
+        }
+
+        for (int j = 0; j < 12; j++)
+        {
+            u162bytes(ch_center[j], scratch);
+            payload.insert(payload.end(), &scratch[0], &scratch[2]);
+        }
+
+        for (int j = 0; j < 12; j++)
+        {
+            u162bytes(ch_top[j], scratch);
+            payload.insert(payload.end(), &scratch[0], &scratch[2]);
+        }
+
+        return payload;
     }
 };
 
@@ -719,6 +1090,17 @@ struct SensorCalibration : BasePayloadStruct
     /* @brief UNIX timestamp in seconds from 1970. */
     uint32_t timestamp;
 
+    SensorCalibration()
+    {
+        id = KFlyTelemetry::KFly_Command::SetSensorCalibration;
+        timestamp = static_cast<uint32_t>( std::time(0) );
+    }
+
+    /**
+     * @brief Converts a payload vector to a proper struct.
+     *
+     * @param[in] payload   The payload from the KFly including header.
+     */
     SensorCalibration(const std::vector<uint8_t> &payload)
     {
         if (payload.size() != 54)
@@ -754,6 +1136,52 @@ struct SensorCalibration : BasePayloadStruct
 
             timestamp = bytes2u32( &payload[i] );
         }
+    }
+
+    /**
+     * @brief  Converts the structure to a byte string that KFly can parse.
+     *
+     * @return The vector containing the byte string.
+     */
+    const std::vector<uint8_t> toPayload(void)
+    {
+        /* Scratchpad for the byte converter. */
+        uint8_t scratch[4];
+
+        /* Create the vector and allocate the area needed. */
+        std::vector<uint8_t> payload;
+        payload.reserve(52);
+
+        /* Add the payload. */
+
+        for (int j = 0; j < 3; j++)
+        {
+            float2bytes(accelerometer_bias[j], scratch);
+            payload.insert(payload.end(), &scratch[0], &scratch[4]);
+        }
+
+        for (int j = 0; j < 3; j++)
+        {
+            float2bytes(accelerometer_gain[j], scratch);
+            payload.insert(payload.end(), &scratch[0], &scratch[4]);
+        }
+
+        for (int j = 0; j < 3; j++)
+        {
+            float2bytes(magnetometer_bias[j], scratch);
+            payload.insert(payload.end(), &scratch[0], &scratch[4]);
+        }
+
+        for (int j = 0; j < 3; j++)
+        {
+            float2bytes(magnetometer_gain[j], scratch);
+            payload.insert(payload.end(), &scratch[0], &scratch[4]);
+        }
+
+        u322bytes(timestamp, scratch);
+        payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+        return payload;
     }
 };
 
@@ -794,6 +1222,104 @@ struct ComputerControlReference : BasePayloadStruct
             float throttle;
         } attitude;
     };
+
+    ComputerControlReference()
+    {
+        id = KFlyTelemetry::KFly_Command::ComputerControlReference;
+    }
+
+    /**
+     * @brief  Converts the structure to a byte string that KFly can parse.
+     *
+     * @return The vector containing the byte string.
+     */
+    const std::vector<uint8_t> toPayload(void)
+    {
+        /* Scratchpad for the byte converter. */
+        uint8_t scratch[4];
+
+        /* Create the vector and allocate the area needed. */
+        std::vector<uint8_t> payload;
+        payload.reserve(24);
+
+        /* Add the payload. */
+
+        u322bytes(static_cast<uint32_t>( mode ), scratch);
+        payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+        switch (mode)
+        {
+        case FlightMode::MOTOR_DIRECT_MODE:
+
+            for (int j = 0; j < 8; j++)
+            {
+                u162bytes(direct_control[j], scratch);
+                payload.insert(payload.end(), &scratch[0], &scratch[2]);
+            }
+
+            payload.insert(payload.end(), 4, 0);
+
+            break;
+
+        case FlightMode::MOTOR_INDIRECT_MODE:
+
+            float2bytes(indirect_control.roll, scratch);
+            payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+            float2bytes(indirect_control.pitch, scratch);
+            payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+            float2bytes(indirect_control.yaw, scratch);
+            payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+            float2bytes(indirect_control.throttle, scratch);
+            payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+            payload.insert(payload.end(), 4, 0);
+
+            break;
+
+        case FlightMode::RATE_MODE:
+
+            float2bytes(rate.roll, scratch);
+            payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+            float2bytes(rate.pitch, scratch);
+            payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+            float2bytes(rate.yaw, scratch);
+            payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+            float2bytes(rate.throttle, scratch);
+            payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+            payload.insert(payload.end(), 4, 0);
+
+            break;
+
+        case FlightMode::ATTITUDE_MODE:
+
+            float2bytes(attitude.w, scratch);
+            payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+            float2bytes(attitude.x, scratch);
+            payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+            float2bytes(attitude.y, scratch);
+            payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+            float2bytes(attitude.z, scratch);
+            payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+            float2bytes(attitude.throttle, scratch);
+            payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+            break;
+
+        }
+
+        return payload;
+    }
 };
 
 /* @brief Vicon measurement to KFly data, used for the internal estimation. */
@@ -804,6 +1330,51 @@ struct ViconMeasurement : BasePayloadStruct
 
     /* @brief Attitude in quaternions. */
     float qw, qx, qy, qz;
+
+    ViconMeasurement()
+    {
+        id = KFlyTelemetry::KFly_Command::ViconMeasurement;
+    }
+
+    /**
+     * @brief  Converts the structure to a byte string that KFly can parse.
+     *
+     * @return The vector containing the byte string.
+     */
+    const std::vector<uint8_t> toPayload(void)
+    {
+        /* Scratchpad for the byte converter. */
+        uint8_t scratch[4];
+
+        /* Create the vector and allocate the area needed. */
+        std::vector<uint8_t> payload;
+        payload.reserve(28);
+
+        /* Add the payload. */
+
+        float2bytes(x, scratch);
+        payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+        float2bytes(y, scratch);
+        payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+        float2bytes(z, scratch);
+        payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+        float2bytes(qw, scratch);
+        payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+        float2bytes(qx, scratch);
+        payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+        float2bytes(qy, scratch);
+        payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+        float2bytes(qz, scratch);
+        payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+        return payload;
+    }
 };
 
 }
