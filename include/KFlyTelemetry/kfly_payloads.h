@@ -42,6 +42,12 @@ union u32Convert
     uint8_t b[4];
 };
 
+union i32Convert
+{
+    uint32_t i32;
+    uint8_t b[4];
+};
+
 union u16Convert
 {
     uint16_t u16;
@@ -74,6 +80,94 @@ static void float2bytes(const float f, uint8_t data[4])
 
     for (int i = 0; i < 4; i++)
         data[i] = f2b.b[i];
+}
+
+static uint32_t bytes2u32(const uint8_t data[4])
+{
+    /* Conversion union */
+    u32Convert c;
+
+    for (int i = 0; i < 4; i++)
+        c.b[i] = data[i];
+
+    return c.u32;
+}
+
+static void u322bytes(const uint32_t u32, uint8_t data[4])
+{
+    /* Conversion union */
+    u32Convert c;
+
+    c.u32 = u32;
+
+    for (int i = 0; i < 4; i++)
+        data[i] = c.b[i];
+}
+
+static int32_t bytes2i32(const uint8_t data[4])
+{
+    /* Conversion union */
+    i32Convert c;
+
+    for (int i = 0; i < 4; i++)
+        c.b[i] = data[i];
+
+    return c.i32;
+}
+
+static void i322bytes(const int32_t i32, uint8_t data[4])
+{
+    /* Conversion union */
+    i32Convert c;
+
+    c.i32 = i32;
+
+    for (int i = 0; i < 4; i++)
+        data[i] = c.b[i];
+}
+
+static uint16_t bytes2u16(const uint8_t data[4])
+{
+    /* Conversion union */
+    u16Convert c;
+
+    for (int i = 0; i < 2; i++)
+        c.b[i] = data[i];
+
+    return c.u16;
+}
+
+static void u162bytes(const uint16_t u16, uint8_t data[4])
+{
+    /* Conversion union */
+    u16Convert c;
+
+    c.u16 = u16;
+
+    for (int i = 0; i < 2; i++)
+        data[i] = c.b[i];
+}
+
+static int16_t bytes2i16(const uint8_t data[4])
+{
+    /* Conversion union */
+    i16Convert c;
+
+    for (int i = 0; i < 2; i++)
+        c.b[i] = data[i];
+
+    return c.i16;
+}
+
+static void i162bytes(const int16_t i16, uint8_t data[4])
+{
+    /* Conversion union */
+    i16Convert c;
+
+    c.i16 = i16;
+
+    for (int i = 0; i < 2; i++)
+        data[i] = c.b[i];
 }
 
 /* @brief The available flight modes via computer control. */
@@ -322,6 +416,37 @@ struct ControllerData : BasePayloadStruct
     {
         float P_gain, I_gain, I_limit;
     } yaw_controller;
+
+    ControllerData(const std::vector<uint8_t> &payload)
+    {
+        if (payload.size() != 38)
+            throw std::invalid_argument( "Wrong size payload" );
+        else
+        {
+            /* Skip the header. */
+            int i = 2;
+
+            roll_controller.P_gain = bytes2float( &payload[i] );
+            i += 4;
+            roll_controller.I_gain = bytes2float( &payload[i] );
+            i += 4;
+            roll_controller.I_limit = bytes2float( &payload[i] );
+            i += 4;
+
+            pitch_controller.P_gain = bytes2float( &payload[i] );
+            i += 4;
+            pitch_controller.I_gain = bytes2float( &payload[i] );
+            i += 4;
+            pitch_controller.I_limit = bytes2float( &payload[i] );
+            i += 4;
+
+            yaw_controller.P_gain = bytes2float( &payload[i] );
+            i += 4;
+            yaw_controller.I_gain = bytes2float( &payload[i] );
+            i += 4;
+            yaw_controller.I_limit = bytes2float( &payload[i] );
+        }
+    }
 };
 
 /* @brief Affine channel mixing matrix. */
@@ -332,6 +457,34 @@ struct ChannelMix : BasePayloadStruct
 
     /* @brief Offset of the outputs, used for servos. */
     float offset[8];
+
+    ChannelMix(const std::vector<uint8_t> &payload)
+    {
+        if (payload.size() != 162)
+            throw std::invalid_argument( "Wrong size payload" );
+        else
+        {
+            /* Skip the header. */
+            int i = 2;
+
+            /* Weights. */
+            for (int j = 0; j < 8; j++)
+            {
+                for (int k = 0; k < 4; k++)
+                {
+                    weights[j][k] = bytes2float( &payload[i] );
+                    i += 4;
+                }
+            }
+
+            /* Offset. */
+            for (int j = 0; j < 8; j++)
+            {
+                offset[j] = bytes2float( &payload[i] );
+                i += 4;
+            }
+        }
+    }
 };
 
 /* @brief Calibration structure for the RC inputs. */
@@ -354,6 +507,50 @@ struct RCCalibration : BasePayloadStruct
 
     /* @brief The bottom value of the RC input (generally around 1000). */
     uint16_t ch_bottom[12];
+
+    RCCalibration(const std::vector<uint8_t> &payload)
+    {
+        if (payload.size() != 102)
+            throw std::invalid_argument( "Wrong size payload" );
+        else
+        {
+            /* Skip the header. */
+            int i = 2;
+
+            mode = static_cast<RCInput_Mode>( bytes2u32( &payload[i] ) );
+            i += 4;
+
+            for (int j = 0; j < 12; j++)
+            {
+                role[i] = static_cast<RCInput_Role>( payload[i] );
+                i++;
+            }
+
+            for (int j = 0; j < 12; j++)
+            {
+                type[i] = static_cast<RCInput_Type>( payload[i] );
+                i++;
+            }
+
+            for (int j = 0; j < 12; j++)
+            {
+                ch_top[i] = bytes2u16( &payload[i] );
+                i += 2;
+            }
+
+            for (int j = 0; j < 12; j++)
+            {
+                ch_center[i] = bytes2u16( &payload[i] );
+                i += 2;
+            }
+
+            for (int j = 0; j < 12; j++)
+            {
+                ch_top[i] = bytes2u16( &payload[i] );
+                i += 2;
+            }
+        }
+    }
 };
 
 /* @brief Get the values and status of the RC input. */
@@ -373,6 +570,34 @@ struct GetRCValues : BasePayloadStruct
 
     /* @brief The frequency of the RSSI PWM. */
     uint16_t rssi_frequency;
+
+    GetRCValues(const std::vector<uint8_t> &payload)
+    {
+        if (payload.size() != 36)
+            throw std::invalid_argument( "Wrong size payload" );
+        else
+        {
+            /* Skip the header. */
+            int i = 2;
+
+            active_connection = (bytes2u32( &payload[i] ) != 0);
+            i += 4;
+
+            num_connections = bytes2u16( &payload[i] );
+            i += 2;
+
+            for (int j = 0; j < 12; j++)
+            {
+                channel_value[j] = bytes2u16( &payload[i] );
+                i += 2;
+            }
+
+            rssi = bytes2u16( &payload[i] );
+            i += 2;
+
+            rssi_frequency = bytes2u16( &payload[i] );
+        }
+    }
 };
 
 /* @brief Calibrated sensor data structure. */
@@ -389,6 +614,37 @@ struct GetSensorData : BasePayloadStruct
 
     /* @brief The temperature of the IMU in deg/C. */
     float temperature;
+
+    GetSensorData(const std::vector<uint8_t> &payload)
+    {
+        if (payload.size() != 42)
+            throw std::invalid_argument( "Wrong size payload" );
+        else
+        {
+            /* Skip the header. */
+            int i = 2;
+
+            for (int j = 0; j < 3; j++)
+            {
+                accelerometer[j] = bytes2float( &payload[i] );
+                i += 4;
+            }
+
+            for (int j = 0; j < 3; j++)
+            {
+                gyroscope[j] = bytes2float( &payload[i] );
+                i += 4;
+            }
+
+            for (int j = 0; j < 3; j++)
+            {
+                magnetometer[j] = bytes2float( &payload[i] );
+                i += 4;
+            }
+
+            temperature = bytes2float( &payload[i] );
+        }
+    }
 };
 
 /* @brief Raw sensor data, used for calibration or logging. */
@@ -408,6 +664,40 @@ struct GetRawSensorData : BasePayloadStruct
 
     /* @brief Pressure in the interal format. */
     uint32_t pressure;
+
+    GetRawSensorData(const std::vector<uint8_t> &payload)
+    {
+        if (payload.size() != 26)
+            throw std::invalid_argument( "Wrong size payload" );
+        else
+        {
+            /* Skip the header. */
+            int i = 2;
+
+            for (int j = 0; j < 3; j++)
+            {
+                accelerometer[j] = bytes2i16( &payload[i] );
+                i += 2;
+            }
+
+            for (int j = 0; j < 3; j++)
+            {
+                gyroscope[j] = bytes2i16( &payload[i] );
+                i += 2;
+            }
+
+            for (int j = 0; j < 3; j++)
+            {
+                magnetometer[j] = bytes2i16( &payload[i] );
+                i += 2;
+            }
+
+            temperature = bytes2i16( &payload[i] );
+            i += 2;
+
+            pressure = bytes2u32( &payload[i] );
+        }
+    }
 };
 
 /* @brief Sensor calibration structure that takes the internal format and
@@ -428,6 +718,43 @@ struct SensorCalibration : BasePayloadStruct
 
     /* @brief UNIX timestamp in seconds from 1970. */
     uint32_t timestamp;
+
+    SensorCalibration(const std::vector<uint8_t> &payload)
+    {
+        if (payload.size() != 54)
+            throw std::invalid_argument( "Wrong size payload" );
+        else
+        {
+            /* Skip the header. */
+            int i = 2;
+
+            for (int j = 0; j < 3; j++)
+            {
+                accelerometer_bias[j] = bytes2float( &payload[i] );
+                i += 4;
+            }
+
+            for (int j = 0; j < 3; j++)
+            {
+                accelerometer_gain[j] = bytes2float( &payload[i] );
+                i += 4;
+            }
+
+            for (int j = 0; j < 3; j++)
+            {
+                magnetometer_bias[j] = bytes2float( &payload[i] );
+                i += 4;
+            }
+
+            for (int j = 0; j < 3; j++)
+            {
+                magnetometer_gain[j] = bytes2float( &payload[i] );
+                i += 4;
+            }
+
+            timestamp = bytes2u32( &payload[i] );
+        }
+    }
 };
 
 
