@@ -19,7 +19,7 @@ telemetry: folder
 gdb: folder
 	cd build && cmake $(DEBUG_FLAGS) ..
 	cd build && make
-	gdb -tui ./build/example/kft_example -ex "focus next" -ex "set output-radix 16" -ex "set print pretty on"
+	cgdb ./build/example/kft_example -ex "set output-radix 16" -ex "set print pretty on"
 
 clean:
 	rm -rf build
