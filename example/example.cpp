@@ -36,6 +36,14 @@ int main()
 
     kft.parse( testPayload );
 
+    std::shared_ptr<KFlyTelemetryPayload::BasePayloadStruct> ptr =
+        std::make_shared<KFlyTelemetryPayload::SetDeviceIDStruct>("test string");
+
+    const std::vector<uint8_t> patload = kft.generatePacket(ptr);
+
+    for (uint8_t b : patload)
+        cout << static_cast<char>( b );
+
     cin.get();
 
     return 0;
