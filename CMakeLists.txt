@@ -67,5 +67,5 @@ target_link_libraries(${PROJECT_NAME}
 ########################################
 # Include the example in the build
 ########################################
-# add_subdirectory(example)
+add_subdirectory(example)
 
