@@ -327,6 +327,41 @@ enum class RCInput_Mode : uint32_t
     MODE_PWM_INPUT = 2
 };
 
+/**
+ * @brief   Possible stick direction for arming the controllers.
+ */
+enum class Arming_Stick_Direction : uint8_t
+{
+    /**
+     * @brief   Arm direction not yet set.
+     */
+    STICK_NONE = 0,
+    /**
+     * @brief   Arm at pitch at min.
+     */
+    STICK_PITCH_MIN,
+    /**
+     * @brief   Arm at pitch at max.
+     */
+    STICK_PITCH_MAX,
+    /**
+     * @brief   Arm at roll at min.
+     */
+    STICK_ROLL_MIN,
+    /**
+     * @brief   Arm at roll at max.
+     */
+    STICK_ROLL_MAX,
+    /**
+     * @brief   Arm at yaw at min.
+     */
+    STICK_YAW_MIN,
+    /**
+     * @brief   Arm at yaw at max.
+     */
+    STICK_YAW_MAX
+};
+
 /* @brief Base structure that allows generic usage of functions. */
 struct BasePayloadStruct
 {
@@ -335,7 +370,7 @@ struct BasePayloadStruct
 };
 
 /* @brief Running mode (bootloader or firmware). */
-struct GetRunningMode : BasePayloadStruct
+struct GetRunningModeStruct : BasePayloadStruct
 {
     /* @brief 'B' for bootloader, 'P' for program. */
     char sel;
@@ -345,7 +380,7 @@ struct GetRunningMode : BasePayloadStruct
      *
      * @param[in] payload   The payload from the KFly including header.
      */
-    GetRunningMode(const std::vector<uint8_t> &payload)
+    GetRunningModeStruct(const std::vector<uint8_t> &payload)
     {
         if (payload.size() < 3)
             throw std::invalid_argument( "Payload too small" );
@@ -357,7 +392,7 @@ struct GetRunningMode : BasePayloadStruct
 };
 
 /* @brief Manage the subscriptions to messages. */
-struct ManageSubscription : BasePayloadStruct
+struct ManageSubscriptionStruct : BasePayloadStruct
 {
     /* @brief Port that the messages will be published on. */
     Ports port;
@@ -371,7 +406,7 @@ struct ManageSubscription : BasePayloadStruct
     /* @brief Milliseconds between publishes, curretly no event option. */
     uint32_t delta_ms;
 
-    ManageSubscription(Ports port, KFlyTelemetry::KFly_Command cmd,
+    ManageSubscriptionStruct(Ports port, KFlyTelemetry::KFly_Command cmd,
                        bool subscribe, uint32_t delta_ms) :
         port(port), cmd(cmd), subscribe(subscribe), delta_ms(delta_ms)
     {
@@ -409,7 +444,7 @@ struct ManageSubscription : BasePayloadStruct
 };
 
 /* @brief Version strings and unique identifiers. */
-struct GetDeviceInfo : BasePayloadStruct
+struct GetDeviceInfoStruct : BasePayloadStruct
 {
     /* @brief The MCU's unique ID. */
     uint8_t unique_id[12];
@@ -428,7 +463,7 @@ struct GetDeviceInfo : BasePayloadStruct
      *
      * @param[in] payload   The payload from the KFly including header.
      */
-    GetDeviceInfo(const std::vector<uint8_t> &payload)
+    GetDeviceInfoStruct(const std::vector<uint8_t> &payload)
     {
         if (payload.size() < 17)
             throw std::invalid_argument( "Payload too small" );
@@ -456,12 +491,12 @@ struct GetDeviceInfo : BasePayloadStruct
 };
 
 /* @brief Set the user ID string. */
-struct SetDeviceID : BasePayloadStruct
+struct SetDeviceIDStruct : BasePayloadStruct
 {
     /* @brief Value of the user ID string. */
     std::string user_string;
 
-    SetDeviceID(std::string user_string) : user_string(user_string)
+    SetDeviceIDStruct(std::string user_string) : user_string(user_string)
     {
         id = KFlyTelemetry::KFly_Command::SetDeviceID;
     }
@@ -486,7 +521,7 @@ struct SetDeviceID : BasePayloadStruct
 };
 
 /* @brief All limits in the control system. */
-struct ControllerLimits : BasePayloadStruct
+struct ControllerLimitsStruct : BasePayloadStruct
 {
     /* @brief Limits in radians/s, when in rate mode. */
     struct
@@ -512,7 +547,7 @@ struct ControllerLimits : BasePayloadStruct
         float horizontal, vertical;
     } max_velocity;
 
-    ControllerLimits()
+    ControllerLimitsStruct()
     {
         id = KFlyTelemetry::KFly_Command::SetControllerLimits;
     }
@@ -522,7 +557,7 @@ struct ControllerLimits : BasePayloadStruct
      *
      * @param[in] payload   The payload from the KFly including header.
      */
-    ControllerLimits(const std::vector<uint8_t> &payload)
+    ControllerLimitsStruct(const std::vector<uint8_t> &payload)
     {
         if (payload.size() != 42)
             throw std::invalid_argument( "Wrong size payload" );
@@ -605,8 +640,60 @@ struct ControllerLimits : BasePayloadStruct
     }
 };
 
+/* @brief Arming settings. */
+struct ArmSettingsStruct : BasePayloadStruct
+{
+     /* @brief   Stick threshold for the arm/disarm logic to react. */
+    float stick_threshold;
+
+    /* @brief   Minimum throttle when armed (to spin propellers when armed). */
+    float armed_min_throttle;
+
+    /* @brief   Stick direction to arm the controllers. */
+    Arming_Stick_Direction stick_direction;
+
+    /* @brief   Time (in seconds) needed to hold the sticks in correct
+     *          position in order to arm the system. */
+    uint8_t arm_stick_time;
+
+    /* @brief   Time (in seconds) needed to disarm the controllers if no
+     *          throttle has been given. */
+    uint8_t arm_zero_throttle_timeout;
+
+    ArmSettingsStruct()
+    {
+        id = KFlyTelemetry::KFly_Command::SetArmSettings;
+    }
+
+    /**
+     * @brief Converts a payload vector to a proper struct.
+     *
+     * @param[in] payload   The payload from the KFly including header.
+     */
+    ArmSettingsStruct(const std::vector<uint8_t> &payload)
+    {
+        if (payload.size() != 13)
+            throw std::invalid_argument( "Wrong size payload" );
+        else
+        {
+            /* Skip the header. */
+            int i = 2;
+
+            stick_threshold = bytes2float( &payload[i] );
+            i += 4;
+            armed_min_throttle = bytes2float( &payload[i] );
+            i += 4;
+            stick_direction = static_cast<Arming_Stick_Direction>( payload[i] );
+            i += 1;
+            arm_stick_time = payload[i];
+            i += 1;
+            arm_zero_throttle_timeout = payload[i];
+        }
+    }
+};
+
 /* @brief Generic controller data structure. */
-struct ControllerData : BasePayloadStruct
+struct ControllerDataStruct : BasePayloadStruct
 {
     /* @brief Roll controller limits and gains. */
     struct
@@ -626,7 +713,7 @@ struct ControllerData : BasePayloadStruct
         float P_gain, I_gain, I_limit;
     } yaw_controller;
 
-    ControllerData(KFlyTelemetry::KFly_Command cmd)
+    ControllerDataStruct(KFlyTelemetry::KFly_Command cmd)
     {
         if ((id == KFlyTelemetry::KFly_Command::SetRateControllerData) ||
             (id == KFlyTelemetry::KFly_Command::SetAttitudeControllerData))
@@ -642,7 +729,7 @@ struct ControllerData : BasePayloadStruct
      *
      * @param[in] payload   The payload from the KFly including header.
      */
-    ControllerData(const std::vector<uint8_t> &payload)
+    ControllerDataStruct(const std::vector<uint8_t> &payload)
     {
         if (payload.size() != 38)
             throw std::invalid_argument( "Wrong size payload" );
@@ -720,7 +807,7 @@ struct ControllerData : BasePayloadStruct
 };
 
 /* @brief Affine channel mixing matrix. */
-struct ChannelMix : BasePayloadStruct
+struct ChannelMixStruct : BasePayloadStruct
 {
     /* @brief Weights to the throttle, pitch, roll, yaw. */
     float weights[8][4];
@@ -728,7 +815,7 @@ struct ChannelMix : BasePayloadStruct
     /* @brief Offset of the outputs, used for servos. */
     float offset[8];
 
-    ChannelMix()
+    ChannelMixStruct()
     {
         id = KFlyTelemetry::KFly_Command::SetChannelMix;
     }
@@ -738,7 +825,7 @@ struct ChannelMix : BasePayloadStruct
      *
      * @param[in] payload   The payload from the KFly including header.
      */
-    ChannelMix(const std::vector<uint8_t> &payload)
+    ChannelMixStruct(const std::vector<uint8_t> &payload)
     {
         if (payload.size() != 162)
             throw std::invalid_argument( "Wrong size payload" );
@@ -804,7 +891,7 @@ struct ChannelMix : BasePayloadStruct
 };
 
 /* @brief Calibration structure for the RC inputs. */
-struct RCCalibration : BasePayloadStruct
+struct RCCalibrationStruct : BasePayloadStruct
 {
     /* @brief If the receiver is in CPPM or PWM mode. */
     RCInput_Mode mode;
@@ -824,7 +911,7 @@ struct RCCalibration : BasePayloadStruct
     /* @brief The bottom value of the RC input (generally around 1000). */
     uint16_t ch_bottom[12];
 
-    RCCalibration()
+    RCCalibrationStruct()
     {
         id = KFlyTelemetry::KFly_Command::SetRCCalibration;
     }
@@ -834,7 +921,7 @@ struct RCCalibration : BasePayloadStruct
      *
      * @param[in] payload   The payload from the KFly including header.
      */
-    RCCalibration(const std::vector<uint8_t> &payload)
+    RCCalibrationStruct(const std::vector<uint8_t> &payload)
     {
         if (payload.size() != 102)
             throw std::invalid_argument( "Wrong size payload" );
@@ -932,7 +1019,7 @@ struct RCCalibration : BasePayloadStruct
 };
 
 /* @brief Get the values and status of the RC input. */
-struct GetRCValues : BasePayloadStruct
+struct GetRCValuesStruct : BasePayloadStruct
 {
     /* @brief Active connection indicator. */
     bool active_connection;
@@ -949,7 +1036,7 @@ struct GetRCValues : BasePayloadStruct
     /* @brief The frequency of the RSSI PWM. */
     uint16_t rssi_frequency;
 
-    GetRCValues(const std::vector<uint8_t> &payload)
+    GetRCValuesStruct(const std::vector<uint8_t> &payload)
     {
         if (payload.size() != 36)
             throw std::invalid_argument( "Wrong size payload" );
@@ -979,7 +1066,7 @@ struct GetRCValues : BasePayloadStruct
 };
 
 /* @brief Calibrated sensor data structure. */
-struct GetSensorData : BasePayloadStruct
+struct GetSensorDataStruct : BasePayloadStruct
 {
     /* @brief Accelerometer data in x, y and z in G. */
     float accelerometer[3];
@@ -993,7 +1080,7 @@ struct GetSensorData : BasePayloadStruct
     /* @brief The temperature of the IMU in deg/C. */
     float temperature;
 
-    GetSensorData(const std::vector<uint8_t> &payload)
+    GetSensorDataStruct(const std::vector<uint8_t> &payload)
     {
         if (payload.size() != 42)
             throw std::invalid_argument( "Wrong size payload" );
@@ -1026,7 +1113,7 @@ struct GetSensorData : BasePayloadStruct
 };
 
 /* @brief Raw sensor data, used for calibration or logging. */
-struct GetRawSensorData : BasePayloadStruct
+struct GetRawSensorDataStruct : BasePayloadStruct
 {
     /* @brief Accelerometer data in x, y and z in the interal format. */
     int16_t accelerometer[3];
@@ -1043,7 +1130,7 @@ struct GetRawSensorData : BasePayloadStruct
     /* @brief Pressure in the interal format. */
     uint32_t pressure;
 
-    GetRawSensorData(const std::vector<uint8_t> &payload)
+    GetRawSensorDataStruct(const std::vector<uint8_t> &payload)
     {
         if (payload.size() != 26)
             throw std::invalid_argument( "Wrong size payload" );
@@ -1080,7 +1167,7 @@ struct GetRawSensorData : BasePayloadStruct
 
 /* @brief Sensor calibration structure that takes the internal format and
  *        converts it into the true values. */
-struct SensorCalibration : BasePayloadStruct
+struct SensorCalibrationStruct : BasePayloadStruct
 {
     /* @brief Accelerometer bias in x, y and z. */
     float accelerometer_bias[3];
@@ -1097,7 +1184,7 @@ struct SensorCalibration : BasePayloadStruct
     /* @brief UNIX timestamp in seconds from 1970. */
     uint32_t timestamp;
 
-    SensorCalibration()
+    SensorCalibrationStruct()
     {
         id = KFlyTelemetry::KFly_Command::SetSensorCalibration;
         timestamp = static_cast<uint32_t>( std::time(0) );
@@ -1108,7 +1195,7 @@ struct SensorCalibration : BasePayloadStruct
      *
      * @param[in] payload   The payload from the KFly including header.
      */
-    SensorCalibration(const std::vector<uint8_t> &payload)
+    SensorCalibrationStruct(const std::vector<uint8_t> &payload)
     {
         if (payload.size() != 54)
             throw std::invalid_argument( "Wrong size payload" );
@@ -1193,12 +1280,12 @@ struct SensorCalibration : BasePayloadStruct
 };
 
 
-struct GetEstimationAllStates : BasePayloadStruct
+struct GetEstimationAllStatesStruct : BasePayloadStruct
 {
 };
 
 /* @brief Computer control data. */
-struct ComputerControlReference : BasePayloadStruct
+struct ComputerControlReferenceStruct : BasePayloadStruct
 {
     /* @brief Flight mode to differentiate the following data. */
     FlightMode mode;
@@ -1230,7 +1317,7 @@ struct ComputerControlReference : BasePayloadStruct
         } attitude;
     };
 
-    ComputerControlReference()
+    ComputerControlReferenceStruct()
     {
         id = KFlyTelemetry::KFly_Command::ComputerControlReference;
     }
@@ -1330,7 +1417,7 @@ struct ComputerControlReference : BasePayloadStruct
 };
 
 /* @brief Vicon measurement to KFly data, used for the internal estimation. */
-struct ViconMeasurement : BasePayloadStruct
+struct ViconMeasurementStruct : BasePayloadStruct
 {
     /* @brief Position in meters. */
     float x, y, z;
@@ -1338,7 +1425,7 @@ struct ViconMeasurement : BasePayloadStruct
     /* @brief Attitude in quaternions. */
     float qw, qx, qy, qz;
 
-    ViconMeasurement()
+    ViconMeasurementStruct()
     {
         id = KFlyTelemetry::KFly_Command::ViconMeasurement;
     }
@@ -1384,6 +1471,6 @@ struct ViconMeasurement : BasePayloadStruct
     }
 };
 
-}
+} // namespace KFlyTelemetryPayload
 
 #endif
