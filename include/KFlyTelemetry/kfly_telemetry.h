@@ -45,7 +45,7 @@ namespace KFlyTelemetry
 
 /** @brief Definition of the message callback. */
 typedef std::function<void(
-const std::shared_ptr<KFlyTelemetryPayload::BasePayloadStruct>)> &kfly_callback;
+const std::shared_ptr<KFlyTelemetryPayload::BasePayloadStruct>)> kfly_callback;
 
 class KFlyTelemetry
 {

@@ -52,13 +52,16 @@ namespace KFlyTelemetry
         data.pop_back();
         data.pop_back();
 
+        /* Calculate CRC. */
+        uint16_t crc_calc = CRC16_CCITT::generateCRC(data);
+
         /* Check sizes and CRC. */
-        if (expected_size + 2 != length)
+        if (expected_size + 4 != length)
         {
             /* Size error. */
             return;
         }
-        else if (CRC16_CCITT::generateCRC(data) != crc.u16)
+        else if (crc_calc != crc.u16)
         {
             /* CRC error. */
             return;

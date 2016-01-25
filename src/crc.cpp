@@ -66,7 +66,7 @@ uint16_t CRC16_CCITT::generateCRC(const std::vector<uint8_t> &payload,
 
     for (auto data : payload)
     {
-        uint8_t tbl_idx = ((crc >> 8) ^ data) & 0x100;
+        uint8_t tbl_idx = ((crc >> 8) ^ data) & 0xff;
         crc = crc16_table[tbl_idx] ^ (crc << 8);
     }
 
