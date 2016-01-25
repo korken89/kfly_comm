@@ -38,20 +38,27 @@ namespace KFlyTelemetry
 
     void KFlyTelemetry::parseKFlyPacket(const std::vector<uint8_t> &payload)
     {
+        /* Extract size and expected size. */
         unsigned int expected_size = (unsigned int) payload[1];
         unsigned int length = payload.size();
-        uint16_t crc = payload[length - 2] | (payload[length - 1] >> 8);
+
+        /* Extract the CRC and remove it. */
+        u16Convert crc;
+
+        crc.b[0] = payload[length - 2];
+        crc.b[1] = payload[length - 1];
 
         std::vector<uint8_t> data(payload);
         data.pop_back();
         data.pop_back();
 
+        /* Check sizes and CRC. */
         if (expected_size + 2 != length)
         {
             /* Size error. */
             return;
         }
-        else if (CRC16_CCITT::generateCRC(data) != crc)
+        else if (CRC16_CCITT::generateCRC(data) != crc.u16)
         {
             /* CRC error. */
             return;
@@ -153,19 +160,6 @@ namespace KFlyTelemetry
     }
 
 
-    const std::vector<uint8_t> KFlyTelemetry::structToPayload(
-            std::shared_ptr<KFlyTelemetryPayload::BasePayloadStruct> payload)
-    {
-        return payload->toPayload();
-    }
-
-    void KFlyTelemetry::generatePacket(const KFly_Command cmd,
-                                       const std::vector<uint8_t> &payload)
-    {
-        (void) cmd;
-        (void) payload;
-    }
-
 
     /*********************************
      * Public members
@@ -218,5 +212,27 @@ namespace KFlyTelemetry
         std::lock_guard<std::mutex> locker(_slip_lock);
 
         _slip_parser.parse(payload);
+    }
+
+    const std::vector<uint8_t>
+        KFlyTelemetry::generatePacket(std::shared_ptr<BasePayloadStruct>
+                                      payload)
+    {
+        std::vector<uint8_t> packet, slip_packet;
+        const std::vector<uint8_t> data_payload = payload->toPayload();
+        u16Convert crc;
+
+        /* Construct the final packet: | CMD | SIZE | PAYLOAD | CRC | */
+        packet.emplace_back(static_cast<uint8_t>( payload->id ));
+        packet.emplace_back(static_cast<uint8_t>( data_payload.size() ));
+
+        packet.insert( packet.end(), data_payload.begin(), data_payload.end());
+
+        crc.u16 = CRC16_CCITT::generateCRC( packet );
+        packet.insert(packet.end(), &crc.b[0], &crc.b[2]);
+
+        SLIP::SLIP::encode( packet, slip_packet );
+
+        return slip_packet;
     }
 }

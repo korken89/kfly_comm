@@ -60,7 +60,10 @@ private:
     /** @brief ID counter for the removal of subscriptions. */
     unsigned int _id;
 
+    /** @brief SLIP parser for the system. */
     SLIP::SLIP _slip_parser;
+
+    /** @brief Lock for the SLIP parser. */
     std::mutex _slip_lock;
 
     /**
@@ -70,20 +73,25 @@ private:
      */
     void executeCallbacks(const std::shared_ptr<BasePayloadStruct> &payload);
 
+    /**
+     * @brief   Parses a payload and, if correct, runs executeCallbacks.
+     *
+     * @param[in] payload   The payload to be parsed.
+     */
     void parseKFlyPacket(const std::vector<uint8_t> &payload);
 
+    /**
+     * @brief   Checks the command to apply the proper structure.
+     *
+     * @param[in] payload   The payload to be parsed.
+     *
+     * @return A BasePayloadStruct that holds the parsed message.
+     */
     std::shared_ptr<BasePayloadStruct>
         payloadToStruct(const std::vector<uint8_t> &payload);
 
-    const std::vector<uint8_t>
-        structToPayload(std::shared_ptr<BasePayloadStruct> payload);
 
-    void generatePacket(const KFly_Command cmd,
-            const std::vector<uint8_t> &payload);
 public:
-    /**
-     * @brief
-     */
     KFlyTelemetry();
 
     ~KFlyTelemetry();
@@ -107,9 +115,29 @@ public:
      */
     bool unregisterCallback(const unsigned int id);
 
+    /**
+     * @brief   Input function for a KFly message, goes to the SLIP parser.
+     *
+     * @param[in] payload   The payload to be parsed.
+     */
     void parse(const uint8_t data);
 
+    /**
+     * @brief   Input function for a KFly message, goes to the SLIP parser.
+     *
+     * @param[in] payload   The payload to be parsed.
+     */
     void parse(const std::vector<uint8_t> &payload);
+
+    /**
+     * @brief   Converts a BasePayloadStruct to a byte message for transmission.
+     *
+     * @param[in] payload   The BasePayloadStruct payload to be converted.
+     *
+     * @return A vector that holds the generated message.
+     */
+    const std::vector<uint8_t>
+        generatePacket(std::shared_ptr<BasePayloadStruct> payload);
 };
 
 } // namespace KFlyTelemetry
