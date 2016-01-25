@@ -335,22 +335,22 @@ enum class Arming_Stick_Direction : uint8_t
     /* @brief   Arm direction not yet set. */
     STICK_NONE = 0,
 
-    /* @brief   Arm at pitch at min. */
+    /* @brief Arm at pitch at min. */
     STICK_PITCH_MIN,
 
-    /* @brief   Arm at pitch at max. */
+    /* @brief Arm at pitch at max. */
     STICK_PITCH_MAX,
 
-    /* @brief   Arm at roll at min. */
+    /* @brief Arm at roll at min. */
     STICK_ROLL_MIN,
 
-    /* @brief   Arm at roll at max. */
+    /* @brief Arm at roll at max. */
     STICK_ROLL_MAX,
 
-    /* @brief   Arm at yaw at min. */
+    /* @brief Arm at yaw at min. */
     STICK_YAW_MIN,
 
-    /* @brief   Arm at yaw at max. */
+    /* @brief Arm at yaw at max. */
     STICK_YAW_MAX
 };
 
@@ -365,7 +365,7 @@ struct BasePayloadStruct
      *
      * @return The vector containing the empty byte string.
      */
-    const std::vector<uint8_t> toPayload()
+    virtual const std::vector<uint8_t> toPayload()
     {
         std::vector<uint8_t> v;
         return v;

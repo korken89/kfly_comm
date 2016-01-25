@@ -64,6 +64,101 @@ namespace KFlyTelemetry
         }
     }
 
+    std::shared_ptr<BasePayloadStruct>
+        KFlyTelemetry::payloadToStruct(const std::vector<uint8_t> &payload)
+    {
+        /* Extract the command. */
+        KFly_Command cmd = static_cast<KFly_Command>( payload[0] );
+
+        /* Create the return. */
+        std::shared_ptr<BasePayloadStruct> ret;
+
+        /* Do appropriate operation for each command. */
+        switch (cmd)
+        {
+        case KFly_Command::ACK:
+
+            ret = std::make_shared<BasePayloadStruct>();
+            break;
+
+        case KFly_Command::GetRunningMode:
+
+            ret = std::make_shared<GetRunningModeStruct>(payload);
+            break;
+
+        case KFly_Command::GetDeviceInfo:
+
+            ret = std::make_shared<GetDeviceInfoStruct>(payload);
+            break;
+
+        case KFly_Command::GetControllerLimits:
+
+            ret = std::make_shared<ControllerLimitsStruct>(payload);
+            break;
+
+        case KFly_Command::GetArmSettings:
+
+            ret = std::make_shared<ArmSettingsStruct>(payload);
+            break;
+
+        case KFly_Command::GetRateControllerData:
+
+            ret = std::make_shared<ControllerDataStruct>(payload);
+            break;
+
+        case KFly_Command::GetAttitudeControllerData:
+
+            ret = std::make_shared<ControllerDataStruct>(payload);
+            break;
+
+        case KFly_Command::GetChannelMix:
+
+            ret = std::make_shared<ChannelMixStruct>(payload);
+            break;
+
+        case KFly_Command::GetRCCalibration:
+
+            ret = std::make_shared<RCCalibrationStruct>(payload);
+            break;
+
+        case KFly_Command::GetRCValues:
+
+            ret = std::make_shared<GetRCValuesStruct>(payload);
+            break;
+
+        case KFly_Command::GetSensorData:
+
+            ret = std::make_shared<GetSensorDataStruct>(payload);
+            break;
+
+        case KFly_Command::GetRawSensorData:
+
+            ret = std::make_shared<GetRawSensorDataStruct>(payload);
+            break;
+
+        case KFly_Command::GetSensorCalibration:
+
+            ret = std::make_shared<SensorCalibrationStruct>(payload);
+            break;
+
+        default:
+
+            ret = std::make_shared<BasePayloadStruct>();
+        }
+
+        /* Set the command and return. */
+        ret->id = cmd;
+
+        return ret;
+    }
+
+
+    const std::vector<uint8_t> KFlyTelemetry::structToPayload(
+            std::shared_ptr<KFlyTelemetryPayload::BasePayloadStruct> payload)
+    {
+        return payload->toPayload();
+    }
+
     void KFlyTelemetry::generatePacket(const KFly_Command cmd,
                                        const std::vector<uint8_t> &payload)
     {

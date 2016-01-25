@@ -38,6 +38,8 @@
 #include "KFlyTelemetry/kfly_payloads.h"
 #include "KFlyTelemetry/crc.h"
 
+using namespace KFlyTelemetryPayload;
+
 namespace KFlyTelemetry
 {
 
@@ -66,13 +68,15 @@ private:
      *
      * @param[in] payload   The payload to be sent.
      */
-    void executeCallbacks(
-       const std::shared_ptr<KFlyTelemetryPayload::BasePayloadStruct> &payload);
+    void executeCallbacks(const std::shared_ptr<BasePayloadStruct> &payload);
 
     void parseKFlyPacket(const std::vector<uint8_t> &payload);
 
-    std::shared_ptr<KFlyTelemetryPayload::BasePayloadStruct>
+    std::shared_ptr<BasePayloadStruct>
         payloadToStruct(const std::vector<uint8_t> &payload);
+
+    const std::vector<uint8_t>
+        structToPayload(std::shared_ptr<BasePayloadStruct> payload);
 
     void generatePacket(const KFly_Command cmd,
             const std::vector<uint8_t> &payload);
