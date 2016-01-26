@@ -27,24 +27,27 @@ void test(const std::shared_ptr<KFlyTelemetryPayload::BasePayloadStruct> data);
 
 int main()
 {
-
+    /* Create a KFly Telemetry object. */
     KFlyTelemetry::KFlyTelemetry kft;
 
+    /* Register a callback. */
     kft.registerCallback(test);
 
+    /* Generate a test message (PING). */
     std::vector<uint8_t> testPayload({0xc0, 0x2, 0, 0x6d, 0x7b, 0xc0});
 
+    /* Test the parser. */
     kft.parse( testPayload );
 
+    /* Create a message for generation. */
     std::shared_ptr<KFlyTelemetryPayload::BasePayloadStruct> ptr =
         std::make_shared<KFlyTelemetryPayload::SetDeviceIDStruct>("test string");
 
+    /* Generate the payload. */
     const std::vector<uint8_t> patload = kft.generatePacket(ptr);
 
     for (uint8_t b : patload)
         cout << static_cast<char>( b );
-
-    cin.get();
 
     return 0;
 }
@@ -53,5 +56,7 @@ int main()
 void test(const std::shared_ptr<KFlyTelemetryPayload::BasePayloadStruct> data)
 {
     (void) data;
+
+    /* Do something with incomming messages. */
 }
 
