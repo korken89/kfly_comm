@@ -1069,7 +1069,7 @@ struct GetRCValuesStruct : BasePayloadStruct
 };
 
 /* @brief Calibrated sensor data structure. */
-struct GetSensorDataStruct : BasePayloadStruct
+struct GetIMUDataStruct : BasePayloadStruct
 {
     /* @brief Accelerometer data in x, y and z in G. */
     float accelerometer[3];
@@ -1083,7 +1083,7 @@ struct GetSensorDataStruct : BasePayloadStruct
     /* @brief The temperature of the IMU in deg/C. */
     float temperature;
 
-    GetSensorDataStruct(const std::vector<uint8_t> &payload)
+    GetIMUDataStruct(const std::vector<uint8_t> &payload)
     {
         if (payload.size() != 42)
             throw std::invalid_argument( "Wrong size payload" );
@@ -1116,7 +1116,7 @@ struct GetSensorDataStruct : BasePayloadStruct
 };
 
 /* @brief Raw sensor data, used for calibration or logging. */
-struct GetRawSensorDataStruct : BasePayloadStruct
+struct GetRawIMUDataStruct : BasePayloadStruct
 {
     /* @brief Accelerometer data in x, y and z in the interal format. */
     int16_t accelerometer[3];
@@ -1133,7 +1133,7 @@ struct GetRawSensorDataStruct : BasePayloadStruct
     /* @brief Pressure in the interal format. */
     uint32_t pressure;
 
-    GetRawSensorDataStruct(const std::vector<uint8_t> &payload)
+    GetRawIMUDataStruct(const std::vector<uint8_t> &payload)
     {
         if (payload.size() != 26)
             throw std::invalid_argument( "Wrong size payload" );
@@ -1170,7 +1170,7 @@ struct GetRawSensorDataStruct : BasePayloadStruct
 
 /* @brief Sensor calibration structure that takes the internal format and
  *        converts it into the true values. */
-struct SensorCalibrationStruct : BasePayloadStruct
+struct IMUCalibrationStruct : BasePayloadStruct
 {
     /* @brief Accelerometer bias in x, y and z. */
     float accelerometer_bias[3];
@@ -1187,7 +1187,7 @@ struct SensorCalibrationStruct : BasePayloadStruct
     /* @brief UNIX timestamp in seconds from 1970. */
     uint32_t timestamp;
 
-    SensorCalibrationStruct()
+    IMUCalibrationStruct()
     {
         id = KFlyTelemetry::KFly_Command::SetSensorCalibration;
         timestamp = static_cast<uint32_t>( std::time(0) );
@@ -1198,7 +1198,7 @@ struct SensorCalibrationStruct : BasePayloadStruct
      *
      * @param[in] payload   The payload from the KFly including header.
      */
-    SensorCalibrationStruct(const std::vector<uint8_t> &payload)
+    IMUCalibrationStruct(const std::vector<uint8_t> &payload)
     {
         if (payload.size() != 54)
             throw std::invalid_argument( "Wrong size payload" );

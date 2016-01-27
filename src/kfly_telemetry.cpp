@@ -138,17 +138,17 @@ namespace KFlyTelemetry
 
         case KFly_Command::GetSensorData:
 
-            ret = std::make_shared<GetSensorDataStruct>(payload);
+            ret = std::make_shared<GetIMUDataStruct>(payload);
             break;
 
         case KFly_Command::GetRawSensorData:
 
-            ret = std::make_shared<GetRawSensorDataStruct>(payload);
+            ret = std::make_shared<GetRawIMUDataStruct>(payload);
             break;
 
         case KFly_Command::GetSensorCalibration:
 
-            ret = std::make_shared<SensorCalibrationStruct>(payload);
+            ret = std::make_shared<IMUCalibrationStruct>(payload);
             break;
 
         default:
