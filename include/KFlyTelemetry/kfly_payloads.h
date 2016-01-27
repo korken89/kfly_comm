@@ -385,7 +385,7 @@ struct GetRunningModeStruct : BasePayloadStruct
      */
     GetRunningModeStruct(const std::vector<uint8_t> &payload)
     {
-        if (payload.size() < 3)
+        if (payload.size() != 3)
             throw std::invalid_argument( "Payload too small" );
         else
         {
@@ -938,31 +938,31 @@ struct RCCalibrationStruct : BasePayloadStruct
 
             for (int j = 0; j < 12; j++)
             {
-                role[i] = static_cast<RCInput_Role>( payload[i] );
+                role[j] = static_cast<RCInput_Role>( payload[i] );
                 i++;
             }
 
             for (int j = 0; j < 12; j++)
             {
-                type[i] = static_cast<RCInput_Type>( payload[i] );
+                type[j] = static_cast<RCInput_Type>( payload[i] );
                 i++;
             }
 
             for (int j = 0; j < 12; j++)
             {
-                ch_top[i] = bytes2u16( &payload[i] );
+                ch_top[j] = bytes2u16( &payload[i] );
                 i += 2;
             }
 
             for (int j = 0; j < 12; j++)
             {
-                ch_center[i] = bytes2u16( &payload[i] );
+                ch_center[j] = bytes2u16( &payload[i] );
                 i += 2;
             }
 
             for (int j = 0; j < 12; j++)
             {
-                ch_top[i] = bytes2u16( &payload[i] );
+                ch_top[j] = bytes2u16( &payload[i] );
                 i += 2;
             }
         }
