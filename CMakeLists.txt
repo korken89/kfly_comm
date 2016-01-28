@@ -1,9 +1,9 @@
 ############################################################################
 #
-# Copyright (C) 2015 Emil Fresk.
+# Copyright (C) 2016 Emil Fresk.
 # All rights reserved.
 #
-# This file is part of the cppViconStream library.
+# This file is part of the KFly Telemetry library.
 #
 # GNU Lesser General Public License Usage
 # This file may be used under the terms of the GNU Lesser
