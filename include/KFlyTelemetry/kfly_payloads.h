@@ -270,7 +270,10 @@ enum class Ports : uint8_t
     PORT_AUX2 = 2,
 
     /* @brief Aux 3 port. */
-    PORT_AUX3 = 3
+    PORT_AUX3 = 3,
+
+    /* @brief Same as the message came on. */
+    PORT_SAME = 0xff
 };
 
 /* @brief   Input capture channel role selector. */
