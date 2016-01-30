@@ -229,7 +229,10 @@ namespace KFlyTelemetry
         packet.emplace_back(static_cast<uint8_t>( payload->id ));
         packet.emplace_back(static_cast<uint8_t>( data_payload.size() ));
 
-        packet.insert( packet.end(), data_payload.begin(), data_payload.end());
+        if (data_payload.size() > 0)
+            packet.insert( packet.end(),
+                           data_payload.begin(),
+                           data_payload.end());
 
         crc.u16 = CRC16_CCITT::generateCRC( packet );
         packet.insert(packet.end(), &crc.b[0], &crc.b[2]);
