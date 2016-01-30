@@ -84,6 +84,7 @@ private:
      * @brief   Checks the command to apply the proper structure.
      *
      * @param[in] payload   The payload to be parsed.
+     * @param[in] ack       If true, then an ack is requested.
      *
      * @return A BasePayloadStruct that holds the parsed message.
      */
@@ -133,10 +134,12 @@ public:
      * @brief   Converts a BasePayloadStruct to a byte message for transmission.
      *
      * @param[in] payload   The BasePayloadStruct payload to be converted.
+     * @param[in] ack       If true, then an ack is requested.
      *
      * @return A vector that holds the generated message.
      */
-    static const std::vector<uint8_t> generatePacket(BasePayloadStruct &payload);
+    static const std::vector<uint8_t> generatePacket(BasePayloadStruct &payload,
+                                                     bool ack);
 
     /**
      * @brief   Converts a BasePayloadStruct to a byte message for transmission.
@@ -147,7 +150,8 @@ public:
      * @return A vector that holds the generated message.
      */
     static const std::vector<uint8_t> generatePacket(
-            const std::shared_ptr<BasePayloadStruct> &payload);
+            const std::shared_ptr<BasePayloadStruct> &payload,
+            bool ack);
 };
 
 } // namespace KFlyTelemetry

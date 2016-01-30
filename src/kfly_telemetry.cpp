@@ -218,14 +218,18 @@ namespace KFlyTelemetry
     }
 
     const std::vector<uint8_t>
-        KFlyTelemetry::generatePacket(BasePayloadStruct &payload)
+        KFlyTelemetry::generatePacket(BasePayloadStruct &payload, bool ack)
     {
         std::vector<uint8_t> packet, slip_packet;
         const std::vector<uint8_t> data_payload = payload.toPayload();
         u16Convert crc;
 
         /* Construct the final packet: | CMD | SIZE | PAYLOAD | CRC | */
-        packet.emplace_back(static_cast<uint8_t>( payload.id ));
+        if (ack)
+            packet.emplace_back(static_cast<uint8_t>( payload.id ) | 0x80);
+        else
+            packet.emplace_back(static_cast<uint8_t>( payload.id ));
+
         packet.emplace_back(static_cast<uint8_t>( data_payload.size() ));
 
         if (data_payload.size() > 0)
@@ -242,14 +246,18 @@ namespace KFlyTelemetry
     }
 
     const std::vector<uint8_t> KFlyTelemetry::generatePacket(
-            const std::shared_ptr<BasePayloadStruct> &payload)
+            const std::shared_ptr<BasePayloadStruct> &payload, bool ack)
     {
         std::vector<uint8_t> packet, slip_packet;
         const std::vector<uint8_t> data_payload = payload->toPayload();
         u16Convert crc;
 
         /* Construct the final packet: | CMD | SIZE | PAYLOAD | CRC | */
-        packet.emplace_back(static_cast<uint8_t>( payload->id ));
+        if (ack)
+            packet.emplace_back(static_cast<uint8_t>( payload->id ) | 0x80);
+        else
+            packet.emplace_back(static_cast<uint8_t>( payload->id ));
+
         packet.emplace_back(static_cast<uint8_t>( data_payload.size() ));
 
         if (data_payload.size() > 0)
