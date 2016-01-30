@@ -136,8 +136,18 @@ public:
      *
      * @return A vector that holds the generated message.
      */
-    const std::vector<uint8_t>
-        generatePacket(std::shared_ptr<BasePayloadStruct> payload);
+    const std::vector<uint8_t> generatePacket(BasePayloadStruct &payload);
+
+    /**
+     * @brief   Converts a BasePayloadStruct to a byte message for transmission.
+     *
+     * @param[in] payload   The BasePayloadStruct payload to be converted
+     *                      passed by shared pointer..
+     *
+     * @return A vector that holds the generated message.
+     */
+    const std::vector<uint8_t> generatePacket(
+            const std::shared_ptr<BasePayloadStruct> &payload);
 };
 
 } // namespace KFlyTelemetry

@@ -218,8 +218,31 @@ namespace KFlyTelemetry
     }
 
     const std::vector<uint8_t>
-        KFlyTelemetry::generatePacket(std::shared_ptr<BasePayloadStruct>
-                                      payload)
+        KFlyTelemetry::generatePacket(BasePayloadStruct &payload)
+    {
+        std::vector<uint8_t> packet, slip_packet;
+        const std::vector<uint8_t> data_payload = payload.toPayload();
+        u16Convert crc;
+
+        /* Construct the final packet: | CMD | SIZE | PAYLOAD | CRC | */
+        packet.emplace_back(static_cast<uint8_t>( payload.id ));
+        packet.emplace_back(static_cast<uint8_t>( data_payload.size() ));
+
+        if (data_payload.size() > 0)
+            packet.insert( packet.end(),
+                           data_payload.begin(),
+                           data_payload.end());
+
+        crc.u16 = CRC16_CCITT::generateCRC( packet );
+        packet.insert(packet.end(), &crc.b[0], &crc.b[2]);
+
+        SLIP::SLIP::encode( packet, slip_packet );
+
+        return slip_packet;
+    }
+
+    const std::vector<uint8_t> KFlyTelemetry::generatePacket(
+            const std::shared_ptr<BasePayloadStruct> &payload)
     {
         std::vector<uint8_t> packet, slip_packet;
         const std::vector<uint8_t> data_payload = payload->toPayload();
