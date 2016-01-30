@@ -136,7 +136,7 @@ public:
      *
      * @return A vector that holds the generated message.
      */
-    const std::vector<uint8_t> generatePacket(BasePayloadStruct &payload);
+    static const std::vector<uint8_t> generatePacket(BasePayloadStruct &payload);
 
     /**
      * @brief   Converts a BasePayloadStruct to a byte message for transmission.
@@ -146,7 +146,7 @@ public:
      *
      * @return A vector that holds the generated message.
      */
-    const std::vector<uint8_t> generatePacket(
+    static const std::vector<uint8_t> generatePacket(
             const std::shared_ptr<BasePayloadStruct> &payload);
 };
 
