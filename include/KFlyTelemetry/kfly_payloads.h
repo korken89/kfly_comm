@@ -388,11 +388,11 @@ struct GetRunningModeStruct : BasePayloadStruct
      */
     GetRunningModeStruct(const std::vector<uint8_t> &payload)
     {
-        if (payload.size() != 3)
+        if (payload.size() != 1)
             throw std::invalid_argument( "Payload too small" );
         else
         {
-            sel = payload[3];
+            sel = payload[1];
         }
     }
 };
@@ -565,12 +565,11 @@ struct ControllerLimitsStruct : BasePayloadStruct
      */
     ControllerLimitsStruct(const std::vector<uint8_t> &payload)
     {
-        if (payload.size() != 42)
+        if (payload.size() != 40)
             throw std::invalid_argument( "Wrong size payload" );
         else
         {
-            /* Skip the header. */
-            int i = 2;
+            int i = 0;
 
             max_rate.roll = bytes2float( &payload[i] );
             i += 4;
@@ -678,12 +677,11 @@ struct ArmSettingsStruct : BasePayloadStruct
      */
     ArmSettingsStruct(const std::vector<uint8_t> &payload)
     {
-        if (payload.size() != 13)
+        if (payload.size() != 11)
             throw std::invalid_argument( "Wrong size payload" );
         else
         {
-            /* Skip the header. */
-            int i = 2;
+            int i = 0;
 
             stick_threshold = bytes2float( &payload[i] );
             i += 4;
@@ -737,12 +735,11 @@ struct ControllerDataStruct : BasePayloadStruct
      */
     ControllerDataStruct(const std::vector<uint8_t> &payload)
     {
-        if (payload.size() != 38)
+        if (payload.size() != 36)
             throw std::invalid_argument( "Wrong size payload" );
         else
         {
-            /* Skip the header. */
-            int i = 2;
+            int i = 0;
 
             roll_controller.P_gain = bytes2float( &payload[i] );
             i += 4;
@@ -833,12 +830,11 @@ struct ChannelMixStruct : BasePayloadStruct
      */
     ChannelMixStruct(const std::vector<uint8_t> &payload)
     {
-        if (payload.size() != 162)
+        if (payload.size() != 160)
             throw std::invalid_argument( "Wrong size payload" );
         else
         {
-            /* Skip the header. */
-            int i = 2;
+            int i = 0;
 
             /* Weights. */
             for (int j = 0; j < 8; j++)
@@ -929,12 +925,11 @@ struct RCCalibrationStruct : BasePayloadStruct
      */
     RCCalibrationStruct(const std::vector<uint8_t> &payload)
     {
-        if (payload.size() != 102)
+        if (payload.size() != 100)
             throw std::invalid_argument( "Wrong size payload" );
         else
         {
-            /* Skip the header. */
-            int i = 2;
+            int i = 0;
 
             mode = static_cast<RCInput_Mode>( bytes2u32( &payload[i] ) );
             i += 4;
@@ -1044,12 +1039,11 @@ struct GetRCValuesStruct : BasePayloadStruct
 
     GetRCValuesStruct(const std::vector<uint8_t> &payload)
     {
-        if (payload.size() != 36)
+        if (payload.size() != 34)
             throw std::invalid_argument( "Wrong size payload" );
         else
         {
-            /* Skip the header. */
-            int i = 2;
+            int i = 0;
 
             active_connection = (bytes2u32( &payload[i] ) != 0);
             i += 4;
@@ -1088,12 +1082,11 @@ struct GetIMUDataStruct : BasePayloadStruct
 
     GetIMUDataStruct(const std::vector<uint8_t> &payload)
     {
-        if (payload.size() != 42)
+        if (payload.size() != 40)
             throw std::invalid_argument( "Wrong size payload" );
         else
         {
-            /* Skip the header. */
-            int i = 2;
+            int i = 0;
 
             for (int j = 0; j < 3; j++)
             {
@@ -1138,12 +1131,11 @@ struct GetRawIMUDataStruct : BasePayloadStruct
 
     GetRawIMUDataStruct(const std::vector<uint8_t> &payload)
     {
-        if (payload.size() != 26)
+        if (payload.size() != 24)
             throw std::invalid_argument( "Wrong size payload" );
         else
         {
-            /* Skip the header. */
-            int i = 2;
+            int i = 0;
 
             for (int j = 0; j < 3; j++)
             {
@@ -1203,12 +1195,11 @@ struct IMUCalibrationStruct : BasePayloadStruct
      */
     IMUCalibrationStruct(const std::vector<uint8_t> &payload)
     {
-        if (payload.size() != 54)
+        if (payload.size() != 52)
             throw std::invalid_argument( "Wrong size payload" );
         else
         {
-            /* Skip the header. */
-            int i = 2;
+            int i = 0;
 
             for (int j = 0; j < 3; j++)
             {

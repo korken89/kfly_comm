@@ -48,9 +48,8 @@ namespace KFlyTelemetry
         crc.b[0] = payload[length - 2];
         crc.b[1] = payload[length - 1];
 
-        std::vector<uint8_t> data(payload);
-        data.pop_back();
-        data.pop_back();
+        /* Remove header and CRC. */
+        const std::vector<uint8_t> data(payload.begin() + 2, payload.end() - 2);
 
         /* Calculate CRC. */
         uint16_t crc_calc = CRC16_CCITT::generateCRC(data);
@@ -69,8 +68,8 @@ namespace KFlyTelemetry
         else
         {
             /* Send payload to further processing. */
-            auto data = payloadToStruct(payload);
-            executeCallbacks(data);
+            auto s = payloadToStruct(data);
+            executeCallbacks(s);
         }
     }
 
