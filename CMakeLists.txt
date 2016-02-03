@@ -50,7 +50,7 @@ include_directories(${catkin_INCLUDE_DIRS}
                     include
                     lib)
 
-add_library(${PROJECT_NAME}
+add_library(${PROJECT_NAME} STATIC
             src/kfly_telemetry.cpp
             src/crc.cpp)
 
