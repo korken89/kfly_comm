@@ -71,7 +71,7 @@ private:
      *
      * @param[in] payload   The payload to be sent.
      */
-    void executeCallbacks(const std::shared_ptr<BasePayloadStruct> &payload);
+    void executeCallbacks(std::shared_ptr<BasePayloadStruct> payload);
 
     /**
      * @brief   Parses a payload and, if correct, runs executeCallbacks.
@@ -83,13 +83,14 @@ private:
     /**
      * @brief   Checks the command to apply the proper structure.
      *
-     * @param[in] payload   The payload to be parsed.
-     * @param[in] ack       If true, then an ack is requested.
+     * @param[in] cmd       Command byte from the packet.
+     * @param[in] payload   The payload to be parsed, without header or CRC.
      *
      * @return A BasePayloadStruct that holds the parsed message.
      */
     std::shared_ptr<BasePayloadStruct>
-        payloadToStruct(const std::vector<uint8_t> &payload);
+        payloadToStruct(const uint8_t cmd,
+                        const std::vector<uint8_t> &payload);
 
 
 public:

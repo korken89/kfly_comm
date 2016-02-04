@@ -27,7 +27,7 @@ namespace KFlyTelemetry
      ********************************/
 
     void KFlyTelemetry::executeCallbacks(
-        const std::shared_ptr<KFlyTelemetryPayload::BasePayloadStruct> &payload)
+        std::shared_ptr<KFlyTelemetryPayload::BasePayloadStruct> payload)
     {
         /* Execute callbacks. */
         std::lock_guard<std::mutex> locker(_id_cblock);
@@ -38,9 +38,12 @@ namespace KFlyTelemetry
 
     void KFlyTelemetry::parseKFlyPacket(const std::vector<uint8_t> &payload)
     {
+        /* Extract command. */
+        const uint8_t cmd = payload[0];
+
         /* Extract size and expected size. */
-        unsigned int expected_size = (unsigned int) payload[1];
-        unsigned int length = payload.size();
+        const unsigned int expected_size = (unsigned int) payload[1];
+        const unsigned int length = payload.size();
 
         /* Extract the CRC and remove it. */
         u16Convert crc;
@@ -48,11 +51,14 @@ namespace KFlyTelemetry
         crc.b[0] = payload[length - 2];
         crc.b[1] = payload[length - 1];
 
-        /* Remove header and CRC. */
-        const std::vector<uint8_t> data(payload.begin() + 2, payload.end() - 2);
+        /* Remove CRC. */
+        std::vector<uint8_t> data(payload.begin(), payload.end() - 2);
 
         /* Calculate CRC. */
         uint16_t crc_calc = CRC16_CCITT::generateCRC(data);
+
+        /* Remove header. */
+        data.erase(data.begin(), data.begin() + 2);
 
         /* Check sizes and CRC. */
         if (expected_size + 4 != length)
@@ -68,22 +74,23 @@ namespace KFlyTelemetry
         else
         {
             /* Send payload to further processing. */
-            auto s = payloadToStruct(data);
+            auto s = payloadToStruct(cmd, data);
             executeCallbacks(s);
         }
     }
 
     std::shared_ptr<BasePayloadStruct>
-        KFlyTelemetry::payloadToStruct(const std::vector<uint8_t> &payload)
+        KFlyTelemetry::payloadToStruct(const uint8_t cmd,
+                                       const std::vector<uint8_t> &payload)
     {
         /* Extract the command. */
-        KFly_Command cmd = static_cast<KFly_Command>( payload[0] );
+        const KFly_Command command = static_cast<KFly_Command>( cmd );
 
         /* Create the return. */
         std::shared_ptr<BasePayloadStruct> ret;
 
         /* Do appropriate operation for each command. */
-        switch (cmd)
+        switch (command)
         {
         case KFly_Command::ACK:
 
@@ -156,7 +163,7 @@ namespace KFlyTelemetry
         }
 
         /* Set the command and return. */
-        ret->id = cmd;
+        ret->id = command;
 
         return ret;
     }

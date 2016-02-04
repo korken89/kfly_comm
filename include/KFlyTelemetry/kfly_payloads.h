@@ -392,7 +392,7 @@ struct GetRunningModeStruct : BasePayloadStruct
             throw std::invalid_argument( "Payload too small" );
         else
         {
-            sel = payload[1];
+            sel = payload[0];
         }
     }
 };
@@ -476,22 +476,23 @@ struct GetDeviceInfoStruct : BasePayloadStruct
         else
         {
             unsigned int i;
+            const unsigned int size = payload.size();
 
             for (i = 0; i < 12; i++)
-                unique_id[i] = payload[i + 2];
+                unique_id[i] = payload[i];
 
-            while ((payload[i] != 0) && (payload.size() - 2 < i))
-                bootloader_version.append( 1, payload[i++ + 2] );
-
-            i++;
-
-            while ((payload[i] != 0) && (payload.size() - 2 < i))
-                firmware_version.append( 1, payload[i++ + 2] );
+            while ((payload[i] != 0) && (i < size))
+                bootloader_version.append( 1, payload[i++] );
 
             i++;
 
-            while ((payload[i] != 0) && (payload.size() - 2 < i))
-                user_string.append( 1, payload[i++ + 2] );
+            while ((payload[i] != 0) && (i < size))
+                firmware_version.append( 1, payload[i++] );
+
+            i++;
+
+            while ((payload[i] != 0) && (i < size))
+                user_string.append( 1, payload[i++] );
         }
     }
 };
