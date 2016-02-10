@@ -695,6 +695,34 @@ struct ArmSettingsStruct : BasePayloadStruct
             arm_zero_throttle_timeout = payload[i];
         }
     }
+
+    /**
+     * @brief  Converts the structure to a byte string that KFly can parse.
+     *
+     * @return The vector containing the byte string.
+     */
+    const std::vector<uint8_t> toPayload(void)
+    {
+        /* Scratchpad for the byte converter. */
+        uint8_t scratch[4];
+
+        /* Create the vector and allocate the area needed. */
+        std::vector<uint8_t> payload;
+        payload.reserve(11);
+
+        /* Add the payload. */
+        float2bytes(stick_threshold, scratch);
+        payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+        float2bytes(armed_min_throttle, scratch);
+        payload.insert(payload.end(), &scratch[0], &scratch[4]);
+
+        payload.emplace_back( static_cast<uint8_t>( stick_direction ) );
+        payload.emplace_back( arm_stick_time );
+        payload.emplace_back( arm_zero_throttle_timeout );
+
+        return payload;
+    }
 };
 
 /* @brief Generic controller data structure. */
