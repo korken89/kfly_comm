@@ -1190,7 +1190,7 @@ struct GetRawIMUDataStruct : BasePayloadStruct
     }
 };
 
-/* @brief Sensor calibration structure that takes the internal format and
+/* @brief IMU calibration structure that takes the internal format and
  *        converts it into the true values. */
 struct IMUCalibrationStruct : BasePayloadStruct
 {
@@ -1211,7 +1211,7 @@ struct IMUCalibrationStruct : BasePayloadStruct
 
     IMUCalibrationStruct()
     {
-        id = KFlyTelemetry::KFly_Command::SetSensorCalibration;
+        id = KFlyTelemetry::KFly_Command::SetIMUCalibration;
         timestamp = static_cast<uint32_t>( std::time(0) );
     }
 

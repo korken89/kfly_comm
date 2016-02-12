@@ -194,21 +194,21 @@ enum class KFly_Command : uint8_t
     /*===============================================*/
 
     /**
-     * @brief   Get calibrated sensor data.
+     * @brief   Get calibrated IMU data.
      */
-    GetSensorData               = 44,
+    GetIMUData                  = 44,
     /**
-     * @brief   Get raw sensor data.
+     * @brief   Get raw IMU data.
      */
-    GetRawSensorData            = 45,
+    GetRawIMUData               = 45,
     /**
-     * @brief   Get sensor calibration.
+     * @brief   Get IMU calibration.
      */
-    GetSensorCalibration        = 46,
+    GetIMUCalibration           = 46,
     /**
-     * @brief   Set sensor calibration.
+     * @brief   Set IMU calibration.
      */
-    SetSensorCalibration        = 47,
+    SetIMUCalibration           = 47,
 
     /*===============================================*/
     /* Estimation specific commands.                 */
