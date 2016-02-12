@@ -748,8 +748,8 @@ struct ControllerDataStruct : BasePayloadStruct
 
     ControllerDataStruct(KFlyTelemetry::KFly_Command cmd)
     {
-        if ((id == KFlyTelemetry::KFly_Command::SetRateControllerData) ||
-            (id == KFlyTelemetry::KFly_Command::SetAttitudeControllerData))
+        if ((cmd == KFlyTelemetry::KFly_Command::SetRateControllerData) ||
+            (cmd == KFlyTelemetry::KFly_Command::SetAttitudeControllerData))
         {
             id = cmd;
         }
@@ -989,7 +989,7 @@ struct RCCalibrationStruct : BasePayloadStruct
 
             for (int j = 0; j < 12; j++)
             {
-                ch_top[j] = bytes2u16( &payload[i] );
+                ch_bottom[j] = bytes2u16( &payload[i] );
                 i += 2;
             }
         }
@@ -1016,14 +1016,12 @@ struct RCCalibrationStruct : BasePayloadStruct
 
         for (int j = 0; j < 12; j++)
         {
-            u162bytes(static_cast<uint16_t>( role[j] ), scratch);
-            payload.insert(payload.end(), &scratch[0], &scratch[2]);
+            payload.emplace_back(static_cast<uint8_t>( role[j] ));
         }
 
         for (int j = 0; j < 12; j++)
         {
-            u162bytes(static_cast<uint16_t>( type[j] ), scratch);
-            payload.insert(payload.end(), &scratch[0], &scratch[2]);
+            payload.emplace_back(static_cast<uint8_t>( type[j] ));
         }
 
         for (int j = 0; j < 12; j++)
@@ -1040,7 +1038,7 @@ struct RCCalibrationStruct : BasePayloadStruct
 
         for (int j = 0; j < 12; j++)
         {
-            u162bytes(ch_top[j], scratch);
+            u162bytes(ch_bottom[j], scratch);
             payload.insert(payload.end(), &scratch[0], &scratch[2]);
         }
 
