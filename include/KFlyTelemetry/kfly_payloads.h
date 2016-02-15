@@ -731,19 +731,19 @@ struct ControllerDataStruct : BasePayloadStruct
     /* @brief Roll controller limits and gains. */
     struct
     {
-        float P_gain, I_gain, I_limit;
+        float P_gain, I_gain;
     } roll_controller;
 
     /* @brief Pitch controller limits and gains. */
     struct
     {
-        float P_gain, I_gain, I_limit;
+        float P_gain, I_gain;
     } pitch_controller;
 
     /* @brief Yaw controller limits and gains. */
     struct
     {
-        float P_gain, I_gain, I_limit;
+        float P_gain, I_gain;
     } yaw_controller;
 
     ControllerDataStruct(KFlyTelemetry::KFly_Command cmd)
@@ -764,7 +764,7 @@ struct ControllerDataStruct : BasePayloadStruct
      */
     ControllerDataStruct(const std::vector<uint8_t> &payload)
     {
-        if (payload.size() != 36)
+        if (payload.size() != 24)
             throw std::invalid_argument( "Wrong size payload" );
         else
         {
@@ -774,21 +774,15 @@ struct ControllerDataStruct : BasePayloadStruct
             i += 4;
             roll_controller.I_gain = bytes2float( &payload[i] );
             i += 4;
-            roll_controller.I_limit = bytes2float( &payload[i] );
-            i += 4;
 
             pitch_controller.P_gain = bytes2float( &payload[i] );
             i += 4;
             pitch_controller.I_gain = bytes2float( &payload[i] );
             i += 4;
-            pitch_controller.I_limit = bytes2float( &payload[i] );
-            i += 4;
 
             yaw_controller.P_gain = bytes2float( &payload[i] );
             i += 4;
             yaw_controller.I_gain = bytes2float( &payload[i] );
-            i += 4;
-            yaw_controller.I_limit = bytes2float( &payload[i] );
         }
     }
 
@@ -813,25 +807,16 @@ struct ControllerDataStruct : BasePayloadStruct
         float2bytes(roll_controller.I_gain, scratch);
         payload.insert(payload.end(), &scratch[0], &scratch[4]);
 
-        float2bytes(roll_controller.I_limit, scratch);
-        payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
         float2bytes(pitch_controller.P_gain, scratch);
         payload.insert(payload.end(), &scratch[0], &scratch[4]);
 
         float2bytes(pitch_controller.I_gain, scratch);
         payload.insert(payload.end(), &scratch[0], &scratch[4]);
 
-        float2bytes(pitch_controller.I_limit, scratch);
-        payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
         float2bytes(yaw_controller.P_gain, scratch);
         payload.insert(payload.end(), &scratch[0], &scratch[4]);
 
         float2bytes(yaw_controller.I_gain, scratch);
-        payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
-        float2bytes(yaw_controller.I_limit, scratch);
         payload.insert(payload.end(), &scratch[0], &scratch[4]);
 
         return payload;
