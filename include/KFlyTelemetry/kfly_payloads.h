@@ -1425,8 +1425,8 @@ struct ComputerControlReferenceStruct : BasePayloadStruct
     }
 };
 
-/* @brief Vicon measurement to KFly data, used for the internal estimation. */
-struct ViconMeasurementStruct : BasePayloadStruct
+/* @brief Motion capture frame to KFly data, used for the internal estimation. */
+struct MotionCaptureFrameStruct : BasePayloadStruct
 {
     /* @brief Position in meters. */
     float x, y, z;
@@ -1434,9 +1434,9 @@ struct ViconMeasurementStruct : BasePayloadStruct
     /* @brief Attitude in quaternions. */
     float qw, qx, qy, qz;
 
-    ViconMeasurementStruct()
+    MotionCaptureFrameStruct()
     {
-        id = KFlyTelemetry::KFly_Command::ViconMeasurement;
+        id = KFlyTelemetry::KFly_Command::MotionCaptureMeasurement;
     }
 
     /**

@@ -249,13 +249,13 @@ enum class KFly_Command : uint8_t
     ComputerControlReference    = 126,
 
     /*===============================================*/
-    /* Vicon Measurement specific commands.          */
+    /* Motion capture frame specific commands.       */
     /*===============================================*/
 
     /**
-     * @brief   New vicon measurement.
+     * @brief   New motion capture measurement.
      */
-    ViconMeasurement            = 127
+    MotionCaptureMeasurement    = 127
 };
 
 }
