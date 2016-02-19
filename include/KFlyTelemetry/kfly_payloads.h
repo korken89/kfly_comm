@@ -1428,6 +1428,9 @@ struct ComputerControlReferenceStruct : BasePayloadStruct
 /* @brief Motion capture frame to KFly data, used for the internal estimation. */
 struct MotionCaptureFrameStruct : BasePayloadStruct
 {
+    /* @brief Frame number. */
+    uint32_t framenumber;
+
     /* @brief Position in meters. */
     float x, y, z;
 
@@ -1451,9 +1454,12 @@ struct MotionCaptureFrameStruct : BasePayloadStruct
 
         /* Create the vector and allocate the area needed. */
         std::vector<uint8_t> payload;
-        payload.reserve(28);
+        payload.reserve(32);
 
         /* Add the payload. */
+
+        u322bytes(framenumber, scratch);
+        payload.insert(payload.end(), &scratch[0], &scratch[4]);
 
         float2bytes(x, scratch);
         payload.insert(payload.end(), &scratch[0], &scratch[4]);
