@@ -110,6 +110,10 @@ enum class KFly_Command : uint8_t
      * @brief   Save all settings to flash.
      */
     SaveToFlash                 = 19,
+    /**
+     * @brief   Erase flash.
+     */
+    EraseFlash                  = 20,
 
     /*===============================================*/
     /* Controller specific commands.                 */
