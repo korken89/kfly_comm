@@ -157,6 +157,11 @@ namespace KFlyTelemetry
             ret = std::make_shared<IMUCalibrationStruct>(payload);
             break;
 
+        case KFly_Command::GetEstimationAttitude:
+
+            ret = std::make_shared<GetEstimationAttitudeStruct>(payload);
+            break;
+
         default:
 
             ret = std::make_shared<BasePayloadStruct>();

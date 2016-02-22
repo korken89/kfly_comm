@@ -1288,7 +1288,62 @@ struct IMUCalibrationStruct : BasePayloadStruct
     }
 };
 
+/* @brief Estimation Attitude structure, holds the attitude estimation states. */
+struct GetEstimationAttitudeStruct : BasePayloadStruct
+{
+    /* @brief Quaternion containing attitude. */
+    float qw, qx, qy, qz;
 
+    /* @brief Angular rates in [rad/s]. */
+    float angular_rate[3];
+
+    /* @brief Angular rate biases in [rad/s]. */
+    float rate_bias[3];
+
+    GetEstimationAttitudeStruct()
+    {
+        id = KFlyTelemetry::KFly_Command::GetEstimationAttitude;
+    }
+
+    /**
+     * @brief Converts a payload vector to a proper struct.
+     *
+     * @param[in] payload   The payload from the KFly including header.
+     */
+    GetEstimationAttitudeStruct(const std::vector<uint8_t> &payload)
+    {
+        if (payload.size() != 40)
+            throw std::invalid_argument( "Wrong size payload" );
+        else
+        {
+            int i = 0;
+
+            qw = bytes2float( &payload[i] );
+            i += 4;
+
+            qx = bytes2float( &payload[i] );
+            i += 4;
+
+            qy = bytes2float( &payload[i] );
+            i += 4;
+
+            qz = bytes2float( &payload[i] );
+            i += 4;
+
+            for (int j = 0; j < 3; j++)
+            {
+                angular_rate[j] = bytes2float( &payload[i] );
+                i += 4;
+            }
+
+            for (int j = 0; j < 3; j++)
+            {
+                rate_bias[j] = bytes2float( &payload[i] );
+                i += 4;
+            }
+        }
+    }
+};
 struct GetEstimationAllStatesStruct : BasePayloadStruct
 {
 };
