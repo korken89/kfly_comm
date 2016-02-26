@@ -244,6 +244,15 @@ enum class KFly_Command : uint8_t
     ResetEstimation             = 53,
 
     /*===============================================*/
+    /* Experiment command (used for testing).        */
+    /*===============================================*/
+
+    /**
+     * @brief   Experiment command.
+     */
+    Experiment                  = 125,
+
+    /*===============================================*/
     /* Computer control specific commands.           */
     /*===============================================*/
 

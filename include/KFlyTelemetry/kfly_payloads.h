@@ -1344,8 +1344,59 @@ struct GetEstimationAttitudeStruct : BasePayloadStruct
         }
     }
 };
+
 struct GetEstimationAllStatesStruct : BasePayloadStruct
 {
+};
+
+/* @brief Experiment structure. */
+struct ExperimentStruct : BasePayloadStruct
+{
+    float acc_z;
+    float angular_rate[3];
+    float torque_ref[3];
+    float throttle_ref;
+    uint16_t cnt;
+
+    ExperimentStruct()
+    {
+        id = KFlyTelemetry::KFly_Command::Experiment;
+    }
+
+    /**
+     * @brief Converts a payload vector to a proper struct.
+     *
+     * @param[in] payload   The payload from the KFly including header.
+     */
+    ExperimentStruct(const std::vector<uint8_t> &payload)
+    {
+        if (payload.size() != 18)
+            throw std::invalid_argument( "Wrong size payload" );
+        else
+        {
+            int i = 0;
+
+            acc_z = ((double)bytes2i16( &payload[i] )) / 10000.0;
+            i += 2;
+
+            for (int j = 0; j < 3; j++)
+            {
+                angular_rate[j] = ((double)bytes2i16( &payload[i] )) / 10000.0;
+                i += 2;
+            }
+
+            for (int j = 0; j < 3; j++)
+            {
+                torque_ref[j] = ((double)bytes2i16( &payload[i] )) / 10000.0;
+                i += 2;
+            }
+
+            throttle_ref = ((double)bytes2i16( &payload[i] )) / 10000.0;
+            i += 2;
+
+            cnt = bytes2u16( &payload[i] );
+        }
+    }
 };
 
 /* @brief Computer control data. */

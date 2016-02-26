@@ -162,6 +162,11 @@ namespace KFlyTelemetry
             ret = std::make_shared<GetEstimationAttitudeStruct>(payload);
             break;
 
+        case KFly_Command::Experiment:
+
+            ret = std::make_shared<ExperimentStruct>(payload);
+            break;
+
         default:
 
             ret = std::make_shared<BasePayloadStruct>();
