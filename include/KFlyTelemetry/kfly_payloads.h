@@ -1449,12 +1449,10 @@ struct ComputerControlReferenceStruct : BasePayloadStruct
 
         /* Create the vector and allocate the area needed. */
         std::vector<uint8_t> payload;
-        payload.reserve(24);
+        payload.reserve(21);
 
         /* Add the payload. */
-
-        u322bytes(static_cast<uint32_t>( mode ), scratch);
-        payload.insert(payload.end(), &scratch[0], &scratch[4]);
+        payload.insert(payload.end(), static_cast<uint8_t>( mode ));
 
         switch (mode)
         {
