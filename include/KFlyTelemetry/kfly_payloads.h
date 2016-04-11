@@ -253,8 +253,11 @@ enum class FlightMode : uint8_t
     /* @brief Control via rate references. */
     RATE_MODE = 3,
 
+    /* @brief Control via Euler references (not implemented). */
+    ATTITUDE_EULER_MODE = 4,
+
     /* @brief Control via attitude references. */
-    ATTITUDE_MODE = 4
+    ATTITUDE_MODE = 5
 };
 
 /* @brief Port selector, select from the USB or the UART ports.  */
