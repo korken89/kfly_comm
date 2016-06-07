@@ -82,20 +82,20 @@ enum class RCInput_Role : uint8_t
     /* @brief Yaw role selector. */
     ROLE_YAW = 4,
 
-    /** @brief Aux 1 role selector. */
-    ROLE_AUX1 = 5,
-
-    /* @brief Aux 2 role selector.  */
-    ROLE_AUX2 = 6,
-
-    /*  @brief Aux 3 role selector. */
-    ROLE_AUX3 = 7,
-
     /* @brief Role of a non-latching switch to arm the flight controller. */
-    ROLE_ARM_NONLATCH = 8,
+    ROLE_ARM_NONLATCH = 5,
 
     /* @brief Role for a latching switch to switch to remote serial control. */
-    ROLE_ENABLE_SERIAL_CONTROL = 9,
+    ROLE_ENABLE_SERIAL_CONTROL = 6,
+
+    /** @brief Aux 1 role selector. */
+    ROLE_AUX1 = 7,
+
+    /* @brief Aux 2 role selector.  */
+    ROLE_AUX2 = 8,
+
+    /*  @brief Aux 3 role selector. */
+    ROLE_AUX3 = 9,
 
     /* @brief The number of roles - 1. Always have at the end! */
     ROLE_MAX = 10
