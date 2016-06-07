@@ -43,6 +43,15 @@ static std::vector<uint8_t> serialize(const T *data)
 }
 
 template<class T>
+static std::vector<uint8_t> serialize(const T *data, size_t size)
+{
+    auto ptr = reinterpret_cast<const uint8_t *>(data);
+    auto buffer = std::vector<uint8_t>{ptr, ptr + size};
+
+    return buffer;
+}
+
+template<class T>
 static void deserialize(T *data, const std::vector<uint8_t> &datagram)
 {
     if (sizeof(T) == datagram.size())
@@ -617,8 +626,10 @@ struct ComputerControlReferenceStruct : BasePayloadStruct
      */
     const std::vector<uint8_t> toPayload()
     {
-        /* TODO: Fix this according to reference type. */
-        return serialize<ComputerControlReferenceStruct>(this);
+        if (mode == FlightMode::ATTITUDE_MODE)
+            return serialize<ComputerControlReferenceStruct>(this);
+        else
+            return serialize<ComputerControlReferenceStruct>(this, 16);
     }
 };
 
