@@ -33,35 +33,6 @@
 namespace KFlyTelemetryPayload
 {
 
-template<class T>
-static std::vector<uint8_t> serialize(const T *data)
-{
-    auto ptr = reinterpret_cast<const uint8_t *>(data);
-    auto buffer = std::vector<uint8_t>{ptr, ptr + sizeof(T)};
-
-    return buffer;
-}
-
-template<class T>
-static std::vector<uint8_t> serialize(const T *data, size_t size)
-{
-    auto ptr = reinterpret_cast<const uint8_t *>(data);
-    auto buffer = std::vector<uint8_t>{ptr, ptr + size};
-
-    return buffer;
-}
-
-template<class T>
-static void deserialize(T *data, const std::vector<uint8_t> &datagram)
-{
-    if (sizeof(T) == datagram.size())
-        std::memcpy(reinterpret_cast<uint8_t *>(data),
-                    datagram.data(),
-                    sizeof(T));
-    else
-        throw std::invalid_argument( "Payload too small" );
-}
-
 
 /*****************************************************************************/
 /* NOTE!!! All structures bellow must be inside the #pragmas !!!             */
@@ -91,6 +62,49 @@ struct BasePayloadStruct
         return v;
     }
 };
+
+
+template<class T>
+static std::vector<uint8_t> serialize(const T *data)
+{
+    constexpr size_t bsize = sizeof(BasePayloadStruct);
+
+    auto ptr = reinterpret_cast<const uint8_t *>(data) + bsize;
+    auto buffer = std::vector<uint8_t>{ptr, ptr + sizeof(T) - bsize};
+
+    return buffer;
+}
+
+template<class T>
+static std::vector<uint8_t> serialize(const T *data, size_t size)
+{
+    constexpr size_t bsize = sizeof(BasePayloadStruct);
+
+    auto ptr = reinterpret_cast<const uint8_t *>(data) + bsize;
+    auto buffer = std::vector<uint8_t>{ptr, ptr + size - bsize};
+
+    return buffer;
+}
+
+template<class T>
+static void deserialize(T *data, const std::vector<uint8_t> &datagram)
+{
+    const size_t bsize = sizeof(BasePayloadStruct);
+
+    if (sizeof(T) == datagram.size() + bsize)
+        std::memcpy(reinterpret_cast<uint8_t *>(data) + bsize,
+                    datagram.data(),
+                    sizeof(T) - bsize);
+    else
+    {
+        std::string s = "Payload error: expected " +
+                        std::to_string(sizeof(T) - bsize) +
+                        ", got " + std::to_string(datagram.size());
+
+        throw std::invalid_argument( s );
+    }
+}
+
 
 /* @brief Running mode (bootloader or firmware). */
 struct GetRunningModeStruct : BasePayloadStruct
@@ -163,7 +177,29 @@ struct GetDeviceInfoStruct : BasePayloadStruct
      */
     GetDeviceInfoStruct(const std::vector<uint8_t> &payload)
     {
-        deserialize<GetDeviceInfoStruct>(this, payload);
+        if (payload.size() < 17)
+            throw std::invalid_argument( "Payload too small" );
+        else
+        {
+            unsigned int i;
+            const unsigned int size = payload.size();
+
+            for (i = 0; i < 12; i++)
+                unique_id[i] = payload[i];
+
+            while ((payload[i] != 0) && (i < size))
+                bootloader_version.append( 1, payload[i++] );
+
+            i++;
+
+            while ((payload[i] != 0) && (i < size))
+                firmware_version.append( 1, payload[i++] );
+
+            i++;
+
+            while ((payload[i] != 0) && (i < size))
+                user_string.append( 1, payload[i++] );
+        }
     }
 };
 
