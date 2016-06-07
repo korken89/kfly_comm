@@ -24,341 +24,42 @@
 #include <cstdint>
 #include <ctime>
 #include <string>
+#include <cstring>
 #include <vector>
 #include <stdexcept>
 #include "KFlyTelemetry/kfly_commands.h"
+#include "KFlyTelemetry/kfly_enums.h"
 
 namespace KFlyTelemetryPayload
 {
 
-/* @brief   Union for converting between float and bytes. */
-union floatConvert
+template<class T>
+static std::vector<uint8_t> serialize(const T *data)
 {
-    float f;
-    uint8_t b[4];
-};
+    auto ptr = reinterpret_cast<const uint8_t *>(data);
+    auto buffer = std::vector<uint8_t>{ptr, ptr + sizeof(T)};
 
-/* @brief   Union for converting between uint32_t and bytes. */
-union u32Convert
-{
-    uint32_t u32;
-    uint8_t b[4];
-};
-
-/* @brief   Union for converting between int32_t and bytes. */
-union i32Convert
-{
-    uint32_t i32;
-    uint8_t b[4];
-};
-
-/* @brief   Union for converting between uint16_t and bytes. */
-union u16Convert
-{
-    uint16_t u16;
-    uint8_t b[2];
-};
-
-/* @brief   Union for converting between int16_t and bytes. */
-union i16Convert
-{
-    int16_t i16;
-    uint8_t b[2];
-};
-
-/**
- * @brief Converts 4 bytes to a float.
- *
- * @param[in] data  The array of bytes.
- *
- * @return The converted float.
- */
-static float bytes2float(const uint8_t data[4])
-{
-    /* Conversion union */
-    floatConvert b2f;
-
-    for (int i = 0; i < 4; i++)
-        b2f.b[i] = data[i];
-
-    return b2f.f;
+    return buffer;
 }
 
-/**
- * @brief Converts a float to 4 bytes.
- *
- * @param[in]  f    The float to be converted.
- * @param[out] data The array of converted bytes.
- */
-static void float2bytes(const float f, uint8_t data[4])
+template<class T>
+static void deserialize(T *data, const std::vector<uint8_t> &datagram)
 {
-    /* Conversion union */
-    floatConvert f2b;
-
-    f2b.f = f;
-
-    for (int i = 0; i < 4; i++)
-        data[i] = f2b.b[i];
+    if (sizeof(T) == datagram.size())
+        std::memcpy(reinterpret_cast<uint8_t *>(data),
+                    datagram.data(),
+                    sizeof(T));
+    else
+        throw std::invalid_argument( "Payload too small" );
 }
 
-/**
- * @brief Converts 4 bytes to a uint32_t.
- *
- * @param[in] data  The array of bytes to be converted.
- *
- * @return The converted uint32_t.
- */
-static uint32_t bytes2u32(const uint8_t data[4])
-{
-    /* Conversion union */
-    u32Convert c;
 
-    for (int i = 0; i < 4; i++)
-        c.b[i] = data[i];
+/*****************************************************************************/
+/* NOTE!!! All structures bellow must be inside the #pragmas !!!             */
+/*****************************************************************************/
 
-    return c.u32;
-}
+#pragma pack(push,1)
 
-/**
- * @brief Converts a uint32_t to 4 bytes.
- *
- * @param[in]  u32  The uint32_t to be converted.
- * @param[out] data The array of converted bytes.
- */
-static void u322bytes(const uint32_t u32, uint8_t data[4])
-{
-    /* Conversion union */
-    u32Convert c;
-
-    c.u32 = u32;
-
-    for (int i = 0; i < 4; i++)
-        data[i] = c.b[i];
-}
-
-/**
- * @brief Converts 4 bytes to a int32_t.
- *
- * @param[in] data  The array of bytes to be converted.
- *
- * @return The converted int32_t.
- */
-static int32_t bytes2i32(const uint8_t data[4])
-{
-    /* Conversion union */
-    i32Convert c;
-
-    for (int i = 0; i < 4; i++)
-        c.b[i] = data[i];
-
-    return c.i32;
-}
-
-/**
- * @brief Converts a int32_t to 4 bytes.
- *
- * @param[in]  i32  The int32_t to be converted.
- * @param[out] data The array of converted bytes.
- */
-static void i322bytes(const int32_t i32, uint8_t data[4])
-{
-    /* Conversion union */
-    i32Convert c;
-
-    c.i32 = i32;
-
-    for (int i = 0; i < 4; i++)
-        data[i] = c.b[i];
-}
-
-/**
- * @brief Converts 2 bytes to a uint16_t.
- *
- * @param[in] data  The array of bytes to be converted.
- *
- * @return The converted uint16_t.
- */
-static uint16_t bytes2u16(const uint8_t data[2])
-{
-    /* Conversion union */
-    u16Convert c;
-
-    for (int i = 0; i < 2; i++)
-        c.b[i] = data[i];
-
-    return c.u16;
-}
-
-/**
- * @brief Converts a uint16_t to 2 bytes.
- *
- * @param[in]  u16  The uint16_t to be converted.
- * @param[out] data The array of converted bytes.
- */
-static void u162bytes(const uint16_t u16, uint8_t data[2])
-{
-    /* Conversion union */
-    u16Convert c;
-
-    c.u16 = u16;
-
-    for (int i = 0; i < 2; i++)
-        data[i] = c.b[i];
-}
-
-/**
- * @brief Converts 2 bytes to a int16_t.
- *
- * @param[in] data  The array of bytes to be converted.
- *
- * @return The converted int16_t.
- */
-static int16_t bytes2i16(const uint8_t data[2])
-{
-    /* Conversion union */
-    i16Convert c;
-
-    for (int i = 0; i < 2; i++)
-        c.b[i] = data[i];
-
-    return c.i16;
-}
-
-/**
- * @brief Converts a int16_t to 2 bytes.
- *
- * @param[in]  i16  The int16_t to be converted.
- * @param[out] data The array of converted bytes.
- */
-static void i162bytes(const int16_t i16, uint8_t data[2])
-{
-    /* Conversion union */
-    i16Convert c;
-
-    c.i16 = i16;
-
-    for (int i = 0; i < 2; i++)
-        data[i] = c.b[i];
-}
-
-/* @brief The available flight modes via computer control. */
-enum class FlightMode : uint8_t
-{
-    /* @brief Control each motor individually. */
-    MOTOR_DIRECT_MODE = 1,
-
-    /* @brief Control each motor through the mixing matrix. */
-    MOTOR_INDIRECT_MODE = 2,
-
-    /* @brief Control via rate references. */
-    RATE_MODE = 3,
-
-    /* @brief Control via Euler references (not implemented). */
-    ATTITUDE_EULER_MODE = 4,
-
-    /* @brief Control via attitude references. */
-    ATTITUDE_MODE = 5
-};
-
-/* @brief Port selector, select from the USB or the UART ports.  */
-enum class Ports : uint8_t
-{
-    /* @brief USB port. */
-    PORT_USB = 0,
-
-    /* @brief Aux 1 port. */
-    PORT_AUX1 = 1,
-
-    /* @brief Aux 2 port. */
-    PORT_AUX2 = 2,
-
-    /* @brief Aux 3 port. */
-    PORT_AUX3 = 3,
-
-    /* @brief Same as the message came on. */
-    PORT_SAME = 0xff
-};
-
-/* @brief   Input capture channel role selector. */
-enum class RCInput_Role : uint8_t
-{
-    /* @brief Unused role selector. */
-    ROLE_OFF = 0,
-
-    /* @brief Throttle role selector. */
-    ROLE_THROTTLE = 1,
-
-    /* @brief Pitch role selector. */
-    ROLE_PITCH = 2,
-
-    /* @brief Roll role selector. */
-    ROLE_ROLL = 3,
-
-    /* @brief Yaw role selector. */
-    ROLE_YAW = 4,
-
-    /* @brief Flight mode role selector. */
-    ROLE_FLIGHT_MODE = 6,
-
-    /* @brief Aux 1 role selector. */
-    ROLE_AUX1 = 7,
-
-    /* @brief Aux 2 role selector. */
-    ROLE_AUX2 = 8,
-
-    /* @brief Aux 3 role selector. */
-    ROLE_AUX3 = 9
-};
-
-/* @brief Input capture channel type. */
-enum class RCInput_Type : uint8_t
-{
-    /* @brief Analog type input. */
-    TYPE_ANALOG = 1,
-
-    /* @brief 3-state type input. */
-    TYPE_3_STATE = 2,
-
-    /* @brief On/off type input. */
-    TYPE_ON_OFF = 3
-};
-
-/* @brief Input capture channel type. */
-enum class RCInput_Mode : uint32_t
-{
-    /* @brief Analog type input. */
-    MODE_CPPM_INPUT = 1,
-
-    /* @brief 3-state type input. */
-    MODE_PWM_INPUT = 2
-};
-
-/**
- * @brief   Possible stick direction for arming the controllers.
- */
-enum class Arming_Stick_Direction : uint8_t
-{
-    /* @brief   Arm direction not yet set. */
-    STICK_NONE = 0,
-
-    /* @brief Arm at pitch at min. */
-    STICK_PITCH_MIN,
-
-    /* @brief Arm at pitch at max. */
-    STICK_PITCH_MAX,
-
-    /* @brief Arm at roll at min. */
-    STICK_ROLL_MIN,
-
-    /* @brief Arm at roll at max. */
-    STICK_ROLL_MAX,
-
-    /* @brief Arm at yaw at min. */
-    STICK_YAW_MIN,
-
-    /* @brief Arm at yaw at max. */
-    STICK_YAW_MAX
-};
 
 /* @brief Base structure that allows generic usage of functions. */
 struct BasePayloadStruct
@@ -366,8 +67,12 @@ struct BasePayloadStruct
     /* @brief ID for the casting later. */
     KFlyTelemetry::KFly_Command id;
 
+    BasePayloadStruct()
+    {
+    }
+
     /**
-     * @brief  Default payload (no data).
+     * @brief  Default payload generation.
      *
      * @return The vector containing the empty byte string.
      */
@@ -391,12 +96,7 @@ struct GetRunningModeStruct : BasePayloadStruct
      */
     GetRunningModeStruct(const std::vector<uint8_t> &payload)
     {
-        if (payload.size() != 1)
-            throw std::invalid_argument( "Payload too small" );
-        else
-        {
-            sel = payload[0];
-        }
+        deserialize<GetRunningModeStruct>(this, payload);
     }
 };
 
@@ -423,32 +123,12 @@ struct ManageSubscriptionStruct : BasePayloadStruct
     }
 
     /**
-     * @brief  Converts the structure to a byte string that KFly can parse.
-     *
-     * @return The vector containing the byte string.
+     * @brief Serializes the struct.
+     * @return  The serialized struct.
      */
-    const std::vector<uint8_t> toPayload(void)
+    const std::vector<uint8_t> toPayload()
     {
-        /* Scratchpad for the byte converter. */
-        uint8_t scratch[4];
-
-        /* Create the vector and allocate the area needed. */
-        std::vector<uint8_t> payload;
-        payload.reserve(7);
-
-        /* Add the payload. */
-        payload.emplace_back( static_cast<uint8_t>( port ) );
-        payload.emplace_back( static_cast<uint8_t>( cmd ) );
-
-        if (subscribe)
-            payload.emplace_back( 1 );
-        else
-            payload.emplace_back( 0 );
-
-        u322bytes(delta_ms, scratch);
-        payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
-        return payload;
+        return serialize<ManageSubscriptionStruct>(this);
     }
 };
 
@@ -474,29 +154,7 @@ struct GetDeviceInfoStruct : BasePayloadStruct
      */
     GetDeviceInfoStruct(const std::vector<uint8_t> &payload)
     {
-        if (payload.size() < 17)
-            throw std::invalid_argument( "Payload too small" );
-        else
-        {
-            unsigned int i;
-            const unsigned int size = payload.size();
-
-            for (i = 0; i < 12; i++)
-                unique_id[i] = payload[i];
-
-            while ((payload[i] != 0) && (i < size))
-                bootloader_version.append( 1, payload[i++] );
-
-            i++;
-
-            while ((payload[i] != 0) && (i < size))
-                firmware_version.append( 1, payload[i++] );
-
-            i++;
-
-            while ((payload[i] != 0) && (i < size))
-                user_string.append( 1, payload[i++] );
-        }
+        deserialize<GetDeviceInfoStruct>(this, payload);
     }
 };
 
@@ -512,21 +170,12 @@ struct SetDeviceIDStruct : BasePayloadStruct
     }
 
     /**
-     * @brief  Converts the structure to a byte string that KFly can parse.
-     *
-     * @return The vector containing the byte string.
+     * @brief Serializes the struct.
+     * @return  The serialized struct.
      */
-    const std::vector<uint8_t> toPayload(void)
+    const std::vector<uint8_t> toPayload()
     {
-        /* Create the vector and allocate the area needed. */
-        std::vector<uint8_t> payload;
-        payload.reserve(user_string.size());
-
-        /* Add the payload. */
-        for (char c : user_string)
-            payload.emplace_back( static_cast<uint8_t>( c ) );
-
-        return payload;
+        return serialize<SetDeviceIDStruct>(this);
     }
 };
 
@@ -565,87 +214,20 @@ struct ControllerLimitsStruct : BasePayloadStruct
     /**
      * @brief Converts a payload vector to a proper struct.
      *
-     * @param[in] payload   The payload from the KFly including header.
+     * @param[in] payload   The payload from the KFly excluding header.
      */
     ControllerLimitsStruct(const std::vector<uint8_t> &payload)
     {
-        if (payload.size() != 40)
-            throw std::invalid_argument( "Wrong size payload" );
-        else
-        {
-            int i = 0;
-
-            max_rate.roll = bytes2float( &payload[i] );
-            i += 4;
-            max_rate.pitch = bytes2float( &payload[i] );
-            i += 4;
-            max_rate.yaw = bytes2float( &payload[i] );
-            i += 4;
-
-            max_rate_attitude.roll = bytes2float( &payload[i] );
-            i += 4;
-            max_rate_attitude.pitch = bytes2float( &payload[i] );
-            i += 4;
-            max_rate_attitude.yaw = bytes2float( &payload[i] );
-            i += 4;
-
-            max_angle.roll = bytes2float( &payload[i] );
-            i += 4;
-            max_angle.pitch = bytes2float( &payload[i] );
-            i += 4;
-
-            max_velocity.horizontal = bytes2float( &payload[i] );
-            i += 4;
-            max_velocity.vertical = bytes2float( &payload[i] );
-        }
+        deserialize<ControllerLimitsStruct>(this, payload);
     }
 
     /**
-     * @brief  Converts the structure to a byte string that KFly can parse.
-     *
-     * @return The vector containing the byte string.
+     * @brief Serializes the struct.
+     * @return  The serialized struct.
      */
-    const std::vector<uint8_t> toPayload(void)
+    const std::vector<uint8_t> toPayload()
     {
-        /* Scratchpad for the byte converter. */
-        uint8_t scratch[4];
-
-        /* Create the vector and allocate the area needed. */
-        std::vector<uint8_t> payload;
-        payload.reserve(40);
-
-        /* Add the payload. */
-        float2bytes(max_rate.roll, scratch);
-        payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
-        float2bytes(max_rate.pitch, scratch);
-        payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
-        float2bytes(max_rate.yaw, scratch);
-        payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
-        float2bytes(max_rate_attitude.roll, scratch);
-        payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
-        float2bytes(max_rate_attitude.pitch, scratch);
-        payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
-        float2bytes(max_rate_attitude.yaw, scratch);
-        payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
-        float2bytes(max_angle.roll, scratch);
-        payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
-        float2bytes(max_angle.pitch, scratch);
-        payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
-        float2bytes(max_velocity.horizontal, scratch);
-        payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
-        float2bytes(max_velocity.vertical, scratch);
-        payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
-        return payload;
+        return serialize<ControllerLimitsStruct>(this);
     }
 };
 
@@ -681,50 +263,16 @@ struct ArmSettingsStruct : BasePayloadStruct
      */
     ArmSettingsStruct(const std::vector<uint8_t> &payload)
     {
-        if (payload.size() != 11)
-            throw std::invalid_argument( "Wrong size payload" );
-        else
-        {
-            int i = 0;
-
-            stick_threshold = bytes2float( &payload[i] );
-            i += 4;
-            armed_min_throttle = bytes2float( &payload[i] );
-            i += 4;
-            stick_direction = static_cast<Arming_Stick_Direction>( payload[i] );
-            i += 1;
-            arm_stick_time = payload[i];
-            i += 1;
-            arm_zero_throttle_timeout = payload[i];
-        }
+        deserialize<ArmSettingsStruct>(this, payload);
     }
 
     /**
-     * @brief  Converts the structure to a byte string that KFly can parse.
-     *
-     * @return The vector containing the byte string.
+     * @brief Serializes the struct.
+     * @return  The serialized struct.
      */
-    const std::vector<uint8_t> toPayload(void)
+    const std::vector<uint8_t> toPayload()
     {
-        /* Scratchpad for the byte converter. */
-        uint8_t scratch[4];
-
-        /* Create the vector and allocate the area needed. */
-        std::vector<uint8_t> payload;
-        payload.reserve(11);
-
-        /* Add the payload. */
-        float2bytes(stick_threshold, scratch);
-        payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
-        float2bytes(armed_min_throttle, scratch);
-        payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
-        payload.emplace_back( static_cast<uint8_t>( stick_direction ) );
-        payload.emplace_back( arm_stick_time );
-        payload.emplace_back( arm_zero_throttle_timeout );
-
-        return payload;
+        return serialize<ArmSettingsStruct>(this);
     }
 };
 
@@ -767,62 +315,16 @@ struct ControllerDataStruct : BasePayloadStruct
      */
     ControllerDataStruct(const std::vector<uint8_t> &payload)
     {
-        if (payload.size() != 24)
-            throw std::invalid_argument( "Wrong size payload" );
-        else
-        {
-            int i = 0;
-
-            roll_controller.P_gain = bytes2float( &payload[i] );
-            i += 4;
-            roll_controller.I_gain = bytes2float( &payload[i] );
-            i += 4;
-
-            pitch_controller.P_gain = bytes2float( &payload[i] );
-            i += 4;
-            pitch_controller.I_gain = bytes2float( &payload[i] );
-            i += 4;
-
-            yaw_controller.P_gain = bytes2float( &payload[i] );
-            i += 4;
-            yaw_controller.I_gain = bytes2float( &payload[i] );
-        }
+        deserialize<ControllerDataStruct>(this, payload);
     }
 
     /**
-     * @brief  Converts the structure to a byte string that KFly can parse.
-     *
-     * @return The vector containing the byte string.
+     * @brief Serializes the struct.
+     * @return  The serialized struct.
      */
-    const std::vector<uint8_t> toPayload(void)
+    const std::vector<uint8_t> toPayload()
     {
-        /* Scratchpad for the byte converter. */
-        uint8_t scratch[4];
-
-        /* Create the vector and allocate the area needed. */
-        std::vector<uint8_t> payload;
-        payload.reserve(36);
-
-        /* Add the payload. */
-        float2bytes(roll_controller.P_gain, scratch);
-        payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
-        float2bytes(roll_controller.I_gain, scratch);
-        payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
-        float2bytes(pitch_controller.P_gain, scratch);
-        payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
-        float2bytes(pitch_controller.I_gain, scratch);
-        payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
-        float2bytes(yaw_controller.P_gain, scratch);
-        payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
-        float2bytes(yaw_controller.I_gain, scratch);
-        payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
-        return payload;
+        return serialize<ControllerDataStruct>(this);
     }
 };
 
@@ -847,65 +349,16 @@ struct ChannelMixStruct : BasePayloadStruct
      */
     ChannelMixStruct(const std::vector<uint8_t> &payload)
     {
-        if (payload.size() != 160)
-            throw std::invalid_argument( "Wrong size payload" );
-        else
-        {
-            int i = 0;
-
-            /* Weights. */
-            for (int j = 0; j < 8; j++)
-            {
-                for (int k = 0; k < 4; k++)
-                {
-                    weights[j][k] = bytes2float( &payload[i] );
-                    i += 4;
-                }
-            }
-
-            /* Offset. */
-            for (int j = 0; j < 8; j++)
-            {
-                offset[j] = bytes2float( &payload[i] );
-                i += 4;
-            }
-        }
+        deserialize<ChannelMixStruct>(this, payload);
     }
 
     /**
-     * @brief  Converts the structure to a byte string that KFly can parse.
-     *
-     * @return The vector containing the byte string.
+     * @brief Serializes the struct.
+     * @return  The serialized struct.
      */
-    const std::vector<uint8_t> toPayload(void)
+    const std::vector<uint8_t> toPayload()
     {
-        /* Scratchpad for the byte converter. */
-        uint8_t scratch[4];
-
-        /* Create the vector and allocate the area needed. */
-        std::vector<uint8_t> payload;
-        payload.reserve(160);
-
-        /* Add the payload. */
-
-        /* Weights. */
-        for (int j = 0; j < 8; j++)
-        {
-            for (int k = 0; k < 4; k++)
-            {
-                float2bytes(weights[j][k], scratch);
-                payload.insert(payload.end(), &scratch[0], &scratch[4]);
-            }
-        }
-
-        /* Offset. */
-        for (int j = 0; j < 8; j++)
-        {
-            float2bytes(offset[j], scratch);
-            payload.insert(payload.end(), &scratch[0], &scratch[4]);
-        }
-
-        return payload;
+        return serialize<ChannelMixStruct>(this);
     }
 };
 
@@ -920,6 +373,9 @@ struct RCCalibrationStruct : BasePayloadStruct
 
     /* @brief Each channels' input type. */
     RCInput_Type type[12];
+
+    /* @brief Flag to reverse a channel. */
+    bool ch_reverse[12];
 
     /* @brief The top value of the RC input (generally around 2000). */
     uint16_t ch_top[12];
@@ -942,95 +398,7 @@ struct RCCalibrationStruct : BasePayloadStruct
      */
     RCCalibrationStruct(const std::vector<uint8_t> &payload)
     {
-        if (payload.size() != 100)
-            throw std::invalid_argument( "Wrong size payload" );
-        else
-        {
-            int i = 0;
-
-            mode = static_cast<RCInput_Mode>( bytes2u32( &payload[i] ) );
-            i += 4;
-
-            for (int j = 0; j < 12; j++)
-            {
-                role[j] = static_cast<RCInput_Role>( payload[i] );
-                i++;
-            }
-
-            for (int j = 0; j < 12; j++)
-            {
-                type[j] = static_cast<RCInput_Type>( payload[i] );
-                i++;
-            }
-
-            for (int j = 0; j < 12; j++)
-            {
-                ch_top[j] = bytes2u16( &payload[i] );
-                i += 2;
-            }
-
-            for (int j = 0; j < 12; j++)
-            {
-                ch_center[j] = bytes2u16( &payload[i] );
-                i += 2;
-            }
-
-            for (int j = 0; j < 12; j++)
-            {
-                ch_bottom[j] = bytes2u16( &payload[i] );
-                i += 2;
-            }
-        }
-    }
-
-    /**
-     * @brief  Converts the structure to a byte string that KFly can parse.
-     *
-     * @return The vector containing the byte string.
-     */
-    const std::vector<uint8_t> toPayload(void)
-    {
-        /* Scratchpad for the byte converter. */
-        uint8_t scratch[4];
-
-        /* Create the vector and allocate the area needed. */
-        std::vector<uint8_t> payload;
-        payload.reserve(100);
-
-        /* Add the payload. */
-
-        u322bytes(static_cast<uint32_t>( mode ), scratch);
-        payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
-        for (int j = 0; j < 12; j++)
-        {
-            payload.emplace_back(static_cast<uint8_t>( role[j] ));
-        }
-
-        for (int j = 0; j < 12; j++)
-        {
-            payload.emplace_back(static_cast<uint8_t>( type[j] ));
-        }
-
-        for (int j = 0; j < 12; j++)
-        {
-            u162bytes(ch_top[j], scratch);
-            payload.insert(payload.end(), &scratch[0], &scratch[2]);
-        }
-
-        for (int j = 0; j < 12; j++)
-        {
-            u162bytes(ch_center[j], scratch);
-            payload.insert(payload.end(), &scratch[0], &scratch[2]);
-        }
-
-        for (int j = 0; j < 12; j++)
-        {
-            u162bytes(ch_bottom[j], scratch);
-            payload.insert(payload.end(), &scratch[0], &scratch[2]);
-        }
-
-        return payload;
+        deserialize<RCCalibrationStruct>(this, payload);
     }
 };
 
@@ -1054,29 +422,7 @@ struct GetRCValuesStruct : BasePayloadStruct
 
     GetRCValuesStruct(const std::vector<uint8_t> &payload)
     {
-        if (payload.size() != 34)
-            throw std::invalid_argument( "Wrong size payload" );
-        else
-        {
-            int i = 0;
-
-            active_connection = (bytes2u32( &payload[i] ) != 0);
-            i += 4;
-
-            num_connections = bytes2u16( &payload[i] );
-            i += 2;
-
-            for (int j = 0; j < 12; j++)
-            {
-                channel_value[j] = bytes2u16( &payload[i] );
-                i += 2;
-            }
-
-            rssi = bytes2u16( &payload[i] );
-            i += 2;
-
-            rssi_frequency = bytes2u16( &payload[i] );
-        }
+        deserialize<GetRCValuesStruct>(this, payload);
     }
 };
 
@@ -1097,32 +443,7 @@ struct GetIMUDataStruct : BasePayloadStruct
 
     GetIMUDataStruct(const std::vector<uint8_t> &payload)
     {
-        if (payload.size() != 40)
-            throw std::invalid_argument( "Wrong size payload" );
-        else
-        {
-            int i = 0;
-
-            for (int j = 0; j < 3; j++)
-            {
-                accelerometer[j] = bytes2float( &payload[i] );
-                i += 4;
-            }
-
-            for (int j = 0; j < 3; j++)
-            {
-                gyroscope[j] = bytes2float( &payload[i] );
-                i += 4;
-            }
-
-            for (int j = 0; j < 3; j++)
-            {
-                magnetometer[j] = bytes2float( &payload[i] );
-                i += 4;
-            }
-
-            temperature = bytes2float( &payload[i] );
-        }
+        deserialize<GetIMUDataStruct>(this, payload);
     }
 };
 
@@ -1146,35 +467,7 @@ struct GetRawIMUDataStruct : BasePayloadStruct
 
     GetRawIMUDataStruct(const std::vector<uint8_t> &payload)
     {
-        if (payload.size() != 24)
-            throw std::invalid_argument( "Wrong size payload" );
-        else
-        {
-            int i = 0;
-
-            for (int j = 0; j < 3; j++)
-            {
-                accelerometer[j] = bytes2i16( &payload[i] );
-                i += 2;
-            }
-
-            for (int j = 0; j < 3; j++)
-            {
-                gyroscope[j] = bytes2i16( &payload[i] );
-                i += 2;
-            }
-
-            for (int j = 0; j < 3; j++)
-            {
-                magnetometer[j] = bytes2i16( &payload[i] );
-                i += 2;
-            }
-
-            temperature = bytes2i16( &payload[i] );
-            i += 2;
-
-            pressure = bytes2u32( &payload[i] );
-        }
+        deserialize<GetRawIMUDataStruct>(this, payload);
     }
 };
 
@@ -1210,84 +503,16 @@ struct IMUCalibrationStruct : BasePayloadStruct
      */
     IMUCalibrationStruct(const std::vector<uint8_t> &payload)
     {
-        if (payload.size() != 52)
-            throw std::invalid_argument( "Wrong size payload" );
-        else
-        {
-            int i = 0;
-
-            for (int j = 0; j < 3; j++)
-            {
-                accelerometer_bias[j] = bytes2float( &payload[i] );
-                i += 4;
-            }
-
-            for (int j = 0; j < 3; j++)
-            {
-                accelerometer_gain[j] = bytes2float( &payload[i] );
-                i += 4;
-            }
-
-            for (int j = 0; j < 3; j++)
-            {
-                magnetometer_bias[j] = bytes2float( &payload[i] );
-                i += 4;
-            }
-
-            for (int j = 0; j < 3; j++)
-            {
-                magnetometer_gain[j] = bytes2float( &payload[i] );
-                i += 4;
-            }
-
-            timestamp = bytes2u32( &payload[i] );
-        }
+        deserialize<IMUCalibrationStruct>(this, payload);
     }
 
     /**
-     * @brief  Converts the structure to a byte string that KFly can parse.
-     *
-     * @return The vector containing the byte string.
+     * @brief Serializes the struct.
+     * @return  The serialized struct.
      */
-    const std::vector<uint8_t> toPayload(void)
+    const std::vector<uint8_t> toPayload()
     {
-        /* Scratchpad for the byte converter. */
-        uint8_t scratch[4];
-
-        /* Create the vector and allocate the area needed. */
-        std::vector<uint8_t> payload;
-        payload.reserve(52);
-
-        /* Add the payload. */
-
-        for (int j = 0; j < 3; j++)
-        {
-            float2bytes(accelerometer_bias[j], scratch);
-            payload.insert(payload.end(), &scratch[0], &scratch[4]);
-        }
-
-        for (int j = 0; j < 3; j++)
-        {
-            float2bytes(accelerometer_gain[j], scratch);
-            payload.insert(payload.end(), &scratch[0], &scratch[4]);
-        }
-
-        for (int j = 0; j < 3; j++)
-        {
-            float2bytes(magnetometer_bias[j], scratch);
-            payload.insert(payload.end(), &scratch[0], &scratch[4]);
-        }
-
-        for (int j = 0; j < 3; j++)
-        {
-            float2bytes(magnetometer_gain[j], scratch);
-            payload.insert(payload.end(), &scratch[0], &scratch[4]);
-        }
-
-        u322bytes(timestamp, scratch);
-        payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
-        return payload;
+        return serialize<IMUCalibrationStruct>(this);
     }
 };
 
@@ -1315,36 +540,7 @@ struct GetEstimationAttitudeStruct : BasePayloadStruct
      */
     GetEstimationAttitudeStruct(const std::vector<uint8_t> &payload)
     {
-        if (payload.size() != 40)
-            throw std::invalid_argument( "Wrong size payload" );
-        else
-        {
-            int i = 0;
-
-            qw = bytes2float( &payload[i] );
-            i += 4;
-
-            qx = bytes2float( &payload[i] );
-            i += 4;
-
-            qy = bytes2float( &payload[i] );
-            i += 4;
-
-            qz = bytes2float( &payload[i] );
-            i += 4;
-
-            for (int j = 0; j < 3; j++)
-            {
-                angular_rate[j] = bytes2float( &payload[i] );
-                i += 4;
-            }
-
-            for (int j = 0; j < 3; j++)
-            {
-                rate_bias[j] = bytes2float( &payload[i] );
-                i += 4;
-            }
-        }
+        deserialize<GetEstimationAttitudeStruct>(this, payload);
     }
 };
 
@@ -1373,32 +569,7 @@ struct ExperimentStruct : BasePayloadStruct
      */
     ExperimentStruct(const std::vector<uint8_t> &payload)
     {
-        if (payload.size() != 18)
-            throw std::invalid_argument( "Wrong size payload" );
-        else
-        {
-            int i = 0;
-
-            acc_z = ((double)bytes2i16( &payload[i] )) / 10000.0;
-            i += 2;
-
-            for (int j = 0; j < 3; j++)
-            {
-                angular_rate[j] = ((double)bytes2i16( &payload[i] )) / 10000.0;
-                i += 2;
-            }
-
-            for (int j = 0; j < 3; j++)
-            {
-                torque_ref[j] = ((double)bytes2i16( &payload[i] )) / 10000.0;
-                i += 2;
-            }
-
-            throttle_ref = ((double)bytes2i16( &payload[i] )) / 10000.0;
-            i += 2;
-
-            cnt = bytes2u16( &payload[i] );
-        }
+        deserialize<ExperimentStruct>(this, payload);
     }
 };
 
@@ -1441,94 +612,13 @@ struct ComputerControlReferenceStruct : BasePayloadStruct
     }
 
     /**
-     * @brief  Converts the structure to a byte string that KFly can parse.
-     *
-     * @return The vector containing the byte string.
+     * @brief Serializes the struct.
+     * @return  The serialized struct.
      */
-    const std::vector<uint8_t> toPayload(void)
+    const std::vector<uint8_t> toPayload()
     {
-        /* Scratchpad for the byte converter. */
-        uint8_t scratch[4];
-
-        /* Create the vector and allocate the area needed. */
-        std::vector<uint8_t> payload;
-        payload.reserve(21);
-
-        /* Add the payload. */
-        payload.insert(payload.end(), static_cast<uint8_t>( mode ));
-
-        switch (mode)
-        {
-        case FlightMode::MOTOR_DIRECT_MODE:
-
-            for (int j = 0; j < 8; j++)
-            {
-                u162bytes(direct_control[j], scratch);
-                payload.insert(payload.end(), &scratch[0], &scratch[2]);
-            }
-
-            payload.insert(payload.end(), 4, 0);
-
-            break;
-
-        case FlightMode::MOTOR_INDIRECT_MODE:
-
-            float2bytes(indirect_control.roll, scratch);
-            payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
-            float2bytes(indirect_control.pitch, scratch);
-            payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
-            float2bytes(indirect_control.yaw, scratch);
-            payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
-            float2bytes(indirect_control.throttle, scratch);
-            payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
-            payload.insert(payload.end(), 4, 0);
-
-            break;
-
-        case FlightMode::RATE_MODE:
-
-            float2bytes(rate.roll, scratch);
-            payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
-            float2bytes(rate.pitch, scratch);
-            payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
-            float2bytes(rate.yaw, scratch);
-            payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
-            float2bytes(rate.throttle, scratch);
-            payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
-            payload.insert(payload.end(), 4, 0);
-
-            break;
-
-        case FlightMode::ATTITUDE_MODE:
-
-            float2bytes(attitude.w, scratch);
-            payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
-            float2bytes(attitude.x, scratch);
-            payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
-            float2bytes(attitude.y, scratch);
-            payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
-            float2bytes(attitude.z, scratch);
-            payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
-            float2bytes(attitude.throttle, scratch);
-            payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
-            break;
-
-        }
-
-        return payload;
+        /* TODO: Fix this according to reference type. */
+        return serialize<ComputerControlReferenceStruct>(this);
     }
 };
 
@@ -1550,48 +640,21 @@ struct MotionCaptureFrameStruct : BasePayloadStruct
     }
 
     /**
-     * @brief  Converts the structure to a byte string that KFly can parse.
-     *
-     * @return The vector containing the byte string.
+     * @brief Serializes the struct.
+     * @return  The serialized struct.
      */
-    const std::vector<uint8_t> toPayload(void)
+    const std::vector<uint8_t> toPayload()
     {
-        /* Scratchpad for the byte converter. */
-        uint8_t scratch[4];
-
-        /* Create the vector and allocate the area needed. */
-        std::vector<uint8_t> payload;
-        payload.reserve(32);
-
-        /* Add the payload. */
-
-        u322bytes(framenumber, scratch);
-        payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
-        float2bytes(x, scratch);
-        payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
-        float2bytes(y, scratch);
-        payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
-        float2bytes(z, scratch);
-        payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
-        float2bytes(qw, scratch);
-        payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
-        float2bytes(qx, scratch);
-        payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
-        float2bytes(qy, scratch);
-        payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
-        float2bytes(qz, scratch);
-        payload.insert(payload.end(), &scratch[0], &scratch[4]);
-
-        return payload;
+        return serialize<MotionCaptureFrameStruct>(this);
     }
 };
+
+
+/*****************************************************************************/
+/* NOTE!!! All structures bellow must be inside the #pragmas !!!             */
+/*****************************************************************************/
+
+#pragma pack(pop)
 
 } // namespace KFlyTelemetryPayload
 

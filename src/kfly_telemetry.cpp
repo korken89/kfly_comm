@@ -46,7 +46,10 @@ namespace KFlyTelemetry
         const unsigned int length = payload.size();
 
         /* Extract the CRC and remove it. */
-        u16Convert crc;
+        union {
+            uint8_t b[2];
+            uint16_t u16;
+        } crc;
 
         crc.b[0] = payload[length - 2];
         crc.b[1] = payload[length - 1];
@@ -238,7 +241,11 @@ namespace KFlyTelemetry
     {
         std::vector<uint8_t> packet, slip_packet;
         const std::vector<uint8_t> data_payload = payload.toPayload();
-        u16Convert crc;
+
+        union {
+            uint8_t b[2];
+            uint16_t u16;
+        } crc;
 
         /* Construct the final packet: | CMD | SIZE | PAYLOAD | CRC | */
         if (ack)
@@ -266,7 +273,11 @@ namespace KFlyTelemetry
     {
         std::vector<uint8_t> packet, slip_packet;
         const std::vector<uint8_t> data_payload = payload->toPayload();
-        u16Convert crc;
+
+        union {
+            uint8_t b[2];
+            uint16_t u16;
+        } crc;
 
         /* Construct the final packet: | CMD | SIZE | PAYLOAD | CRC | */
         if (ack)
