@@ -445,6 +445,15 @@ struct RCCalibrationStruct : BasePayloadStruct
     {
         deserialize<RCCalibrationStruct>(this, payload);
     }
+
+    /**
+     * @brief Serializes the struct.
+     * @return  The serialized struct.
+     */
+    const std::vector<uint8_t> toPayload()
+    {
+        return serialize<RCCalibrationStruct>(this);
+    }
 };
 
 /* @brief Get the values and status of the RC input. */
