@@ -413,6 +413,8 @@ struct RCCalibrationStruct : BasePayloadStruct
     /* @brief If the receiver is in CPPM or PWM mode. */
     RCInput_Mode mode;
 
+    uint16_t use_rssi;
+
     /* @brief Each channels' input role. */
     RCInput_Role role[12];
 

@@ -67,42 +67,42 @@ enum class Ports : uint8_t
 /* @brief   Input capture channel role selector. */
 enum class RCInput_Role : uint8_t
 {
-    /* @brief Unused role selector. */
-    ROLE_OFF = 0,
 
     /* @brief Throttle role selector. */
-    ROLE_THROTTLE = 1,
+    ROLE_THROTTLE = 0,
 
     /* @brief Pitch role selector. */
-    ROLE_PITCH = 2,
+    ROLE_PITCH = 1,
 
     /* @brief Roll role selector. */
-    ROLE_ROLL = 3,
+    ROLE_ROLL = 2,
 
     /* @brief Yaw role selector. */
-    ROLE_YAW = 4,
-
-    /* @brief Role of a non-latching switch to arm the flight controller. */
-    ROLE_ARM_NONLATCH = 5,
-
-    /* @brief Role for a latching switch to switch to remote serial control. */
-    ROLE_ENABLE_SERIAL_CONTROL = 6,
+    ROLE_YAW = 3,
 
     /* @brief Aux 1 role selector. */
-    ROLE_FLIGHTMODE = 7,
-
-    /* @brief Aux 1 role selector. */
-    ROLE_AUX1 = 8,
+    ROLE_AUX1 = 4,
 
     /* @brief Aux 2 role selector.  */
-    ROLE_AUX2 = 9,
+    ROLE_AUX2 = 5,
 
     /*  @brief Aux 3 role selector. */
-    ROLE_AUX3 = 10,
+    ROLE_AUX3 = 6,
+
+    /* @brief Role of a non-latching switch to arm the flight controller. */
+    ROLE_ARM_NONLATCH = 7,
+
+    /* @brief Role for a latching switch to switch to remote serial control. */
+    ROLE_ENABLE_SERIAL_CONTROL = 8,
+
+    /* @brief Aux 1 role selector. */
+    ROLE_FLIGHTMODE = 9,
 
     /* @brief The number of roles - 1. Always have at the end! */
-    ROLE_MAX = 11
+    ROLE_MAX = 10,
 
+    /* @brief Unused role selector. */
+    ROLE_OFF = 0xff,
 };
 
 /* @brief Input capture channel type. */
@@ -119,7 +119,7 @@ enum class RCInput_Type : uint8_t
 };
 
 /* @brief Input capture channel type. */
-enum class RCInput_Mode : uint32_t
+enum class RCInput_Mode : uint16_t
 {
     /* @brief Analog type input. */
     MODE_CPPM_INPUT = 1,
