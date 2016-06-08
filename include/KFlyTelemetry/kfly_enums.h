@@ -88,17 +88,20 @@ enum class RCInput_Role : uint8_t
     /* @brief Role for a latching switch to switch to remote serial control. */
     ROLE_ENABLE_SERIAL_CONTROL = 6,
 
-    /** @brief Aux 1 role selector. */
-    ROLE_AUX1 = 7,
+    /* @brief Aux 1 role selector. */
+    ROLE_FLIGHTMODE = 7,
+
+    /* @brief Aux 1 role selector. */
+    ROLE_AUX1 = 8,
 
     /* @brief Aux 2 role selector.  */
-    ROLE_AUX2 = 8,
+    ROLE_AUX2 = 9,
 
     /*  @brief Aux 3 role selector. */
-    ROLE_AUX3 = 9,
+    ROLE_AUX3 = 10,
 
     /* @brief The number of roles - 1. Always have at the end! */
-    ROLE_MAX = 10
+    ROLE_MAX = 11
 
 };
 
