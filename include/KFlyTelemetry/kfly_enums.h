@@ -128,6 +128,25 @@ enum class RCInput_Mode : uint16_t
     MODE_PWM_INPUT = 2
 };
 
+/* @brief Input switch states. */
+enum class RCInput_Switch_Position : uint8_t
+{
+    /* @brief   Switch error, not a switch. */
+    RCINPUT_SWITCH_UNDEFINED = 0,
+
+    /* @brief   Switch error, not a switch. */
+    RCINPUT_SWITCH_NOT_SWITCH = 1,
+
+    /* @brief   Switch at bottom position. */
+    RCINPUT_SWITCH_POSITION_BOTTOM = 2,
+
+    /* @brief   Switch at center position. */
+    RCINPUT_SWITCH_POSITION_CENTER = 3,
+
+    /* @brief   Switch at top position. */
+    RCINPUT_SWITCH_POSITION_TOP = 4
+};
+
 /**
  * @brief   Possible stick direction for arming the controllers.
  */

@@ -462,7 +462,7 @@ struct RCCalibrationStruct : BasePayloadStruct
 struct GetRCValuesStruct : BasePayloadStruct
 {
     /* @brief Active connection indicator. */
-    bool active_connection;
+    uint32_t active_connection;
 
     /* @brief Number of active inputs (all 12 might not be used). */
     uint16_t num_connections;
@@ -475,6 +475,12 @@ struct GetRCValuesStruct : BasePayloadStruct
 
     /* @brief The frequency of the RSSI PWM. */
     uint16_t rssi_frequency;
+
+    /* @brief The calibrated input value of each channel. */
+    float calibrated_value[12];
+
+    /* @brief Input switch states. */
+    RCInput_Switch_Position switches[3];
 
     GetRCValuesStruct(const std::vector<uint8_t> &payload)
     {
