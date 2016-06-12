@@ -181,17 +181,25 @@ enum class KFly_Command : uint8_t
     /*===============================================*/
 
     /**
-     * @brief   Get RC calibration.
+     * @brief   Get RC input settings.
      */
-    GetRCCalibration            = 41,
+    GetRCInputSettings          = 41,
     /**
-     * @brief   Set RC calibration.
+     * @brief   Set RC input settings.
      */
-    SetRCCalibration            = 42,
+    SetRCInputSettings          = 42,
+    /**
+     * @brief   Get RC input settings.
+     */
+    GetRCOutputSettings         = 43,
+    /**
+     * @brief   Set RC input settings.
+     */
+    SetRCOutputSettings         = 44,
     /**
      * @brief   Get RC values.
      */
-    GetRCValues                 = 43,
+    GetRCValues                 = 45,
 
     /*===============================================*/
     /* Sensor specific commands.                     */
@@ -200,19 +208,19 @@ enum class KFly_Command : uint8_t
     /**
      * @brief   Get calibrated IMU data.
      */
-    GetIMUData                  = 44,
+    GetIMUData                  = 46,
     /**
      * @brief   Get raw IMU data.
      */
-    GetRawIMUData               = 45,
+    GetRawIMUData               = 47,
     /**
      * @brief   Get IMU calibration.
      */
-    GetIMUCalibration           = 46,
+    GetIMUCalibration           = 48,
     /**
      * @brief   Set IMU calibration.
      */
-    SetIMUCalibration           = 47,
+    SetIMUCalibration           = 49,
 
     /*===============================================*/
     /* Estimation specific commands.                 */
@@ -221,27 +229,27 @@ enum class KFly_Command : uint8_t
     /**
      * @brief   Get rate estimation.
      */
-    GetEstimationRate           = 48,
+    GetEstimationRate           = 50,
     /**
      * @brief   Get attitude estimation.
      */
-    GetEstimationAttitude       = 49,
+    GetEstimationAttitude       = 51,
     /**
      * @brief   Get velocity estimation.
      */
-    GetEstimationVelocity       = 50,
+    GetEstimationVelocity       = 52,
     /**
      * @brief   Get position estimation.
      */
-    GetEstimationPosition       = 51,
+    GetEstimationPosition       = 53,
     /**
      * @brief   Get all states.
      */
-    GetEstimationAllStates      = 52,
+    GetEstimationAllStates      = 54,
     /**
      * @brief   Reset estimation.
      */
-    ResetEstimation             = 53,
+    ResetEstimation             = 55,
 
     /*===============================================*/
     /* Experiment command (used for testing).        */

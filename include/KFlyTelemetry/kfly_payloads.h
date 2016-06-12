@@ -407,8 +407,8 @@ struct ChannelMixStruct : BasePayloadStruct
     }
 };
 
-/* @brief Calibration structure for the RC inputs. */
-struct RCCalibrationStruct : BasePayloadStruct
+/* @brief Settings structure for the RC inputs. */
+struct RCInputSettingsStruct : BasePayloadStruct
 {
     /* @brief If the receiver is in CPPM or PWM mode. */
     RCInput_Mode mode;
@@ -433,9 +433,9 @@ struct RCCalibrationStruct : BasePayloadStruct
     /* @brief The bottom value of the RC input (generally around 1000). */
     uint16_t ch_bottom[12];
 
-    RCCalibrationStruct()
+    RCInputSettingsStruct()
     {
-        id = KFlyTelemetry::KFly_Command::SetRCCalibration;
+        id = KFlyTelemetry::KFly_Command::SetRCInputSettings;
     }
 
     /**
@@ -443,9 +443,9 @@ struct RCCalibrationStruct : BasePayloadStruct
      *
      * @param[in] payload   The payload from the KFly including header.
      */
-    RCCalibrationStruct(const std::vector<uint8_t> &payload)
+    RCInputSettingsStruct(const std::vector<uint8_t> &payload)
     {
-        deserialize<RCCalibrationStruct>(this, payload);
+        deserialize<RCInputSettingsStruct>(this, payload);
     }
 
     /**
@@ -454,7 +454,44 @@ struct RCCalibrationStruct : BasePayloadStruct
      */
     const std::vector<uint8_t> toPayload()
     {
-        return serialize<RCCalibrationStruct>(this);
+        return serialize<RCInputSettingsStruct>(this);
+    }
+};
+
+/* @brief Settings structure for the RC inputs. */
+struct RCOutputSettingsStruct : BasePayloadStruct
+{
+    /* @brief Mode of the outputs of bank 1. */
+    RCOutput_Mode mode_bank1;
+
+    /* @brief Mode of the outputs of bank 2. */
+    RCOutput_Mode mode_bank2;
+
+    /* @brief Enable flag for each output. */
+    bool channel_enabled[8];
+
+    RCOutputSettingsStruct()
+    {
+        id = KFlyTelemetry::KFly_Command::SetRCOutputSettings;
+    }
+
+    /**
+     * @brief Converts a payload vector to a proper struct.
+     *
+     * @param[in] payload   The payload from the KFly including header.
+     */
+    RCOutputSettingsStruct(const std::vector<uint8_t> &payload)
+    {
+        deserialize<RCOutputSettingsStruct>(this, payload);
+    }
+
+    /**
+     * @brief Serializes the struct.
+     * @return  The serialized struct.
+     */
+    const std::vector<uint8_t> toPayload()
+    {
+        return serialize<RCOutputSettingsStruct>(this);
     }
 };
 

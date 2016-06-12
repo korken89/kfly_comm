@@ -148,6 +148,25 @@ enum class RCInput_Switch_Position : uint8_t
 };
 
 /**
+ * @brief Enum for selecting the period of the output PPM.
+ */
+enum class RCOutput_Mode : uint8_t
+{
+    /**
+     * @brief Output mode PWM @ 400 Hz.
+     */
+    RCOUTPUT_MODE_400HZ_PWM = 0,
+    /**
+     * @brief Output mode PWM @ 50 Hz.
+     */
+    RCOUTPUT_MODE_50HZ_PWM = 1,
+    /**
+     * @brief Output mode OPM (OneShot125).
+     */
+    RCOUTPUT_MODE_OPM = 2
+};
+
+/**
  * @brief   Possible stick direction for arming the controllers.
  */
 enum class Arming_Stick_Direction : uint8_t

@@ -135,9 +135,14 @@ namespace KFlyTelemetry
             ret = std::make_shared<ChannelMixStruct>(payload);
             break;
 
-        case KFly_Command::GetRCCalibration:
+        case KFly_Command::GetRCInputSettings:
 
-            ret = std::make_shared<RCCalibrationStruct>(payload);
+            ret = std::make_shared<RCInputSettingsStruct>(payload);
+            break;
+
+        case KFly_Command::GetRCOutputSettings:
+
+            ret = std::make_shared<RCOutputSettingsStruct>(payload);
             break;
 
         case KFly_Command::GetRCValues:
