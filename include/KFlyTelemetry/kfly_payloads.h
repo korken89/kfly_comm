@@ -76,12 +76,12 @@ static std::vector<uint8_t> serialize(const T *data)
 }
 
 template<class T>
-static std::vector<uint8_t> serialize(const T *data, size_t size)
+static std::vector<uint8_t> serialize(const T *data, const size_t size)
 {
     constexpr size_t bsize = sizeof(BasePayloadStruct);
 
     auto ptr = reinterpret_cast<const uint8_t *>(data) + bsize;
-    auto buffer = std::vector<uint8_t>{ptr, ptr + size - bsize};
+    auto buffer = std::vector<uint8_t>{ptr, ptr + size};
 
     return buffer;
 }
@@ -708,6 +708,13 @@ struct ComputerControlReferenceStruct : BasePayloadStruct
     ComputerControlReferenceStruct()
     {
         id = KFlyTelemetry::KFly_Command::ComputerControlReference;
+
+        /* Zero all fields. */
+        attitude.w = 0;
+        attitude.x = 0;
+        attitude.y = 0;
+        attitude.z = 0;
+        attitude.throttle = 0;
     }
 
     /**
@@ -716,10 +723,7 @@ struct ComputerControlReferenceStruct : BasePayloadStruct
      */
     const std::vector<uint8_t> toPayload()
     {
-        if (mode == FlightMode::ATTITUDE_MODE)
-            return serialize<ComputerControlReferenceStruct>(this);
-        else
-            return serialize<ComputerControlReferenceStruct>(this, 16);
+        return serialize<ComputerControlReferenceStruct>(this);
     }
 };
 
