@@ -89,7 +89,7 @@ static std::vector<uint8_t> serialize(const T *data, const size_t size)
 template<class T>
 static void deserialize(T *data, const std::vector<uint8_t> &datagram)
 {
-    const size_t bsize = sizeof(BasePayloadStruct);
+    constexpr size_t bsize = sizeof(BasePayloadStruct);
 
     if (sizeof(T) == datagram.size() + bsize)
         std::memcpy(reinterpret_cast<uint8_t *>(data) + bsize,
