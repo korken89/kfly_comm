@@ -4,6 +4,8 @@
 Uses the SLIP protocol to encode KFly packets.
 Description: https://en.wikipedia.org/wiki/Serial_Line_Internet_Protocol
 
+***NOTE: Will soon be using COBS***
+
 ## Contributors
 
 * Emil Fresk
