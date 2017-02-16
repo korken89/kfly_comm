@@ -549,20 +549,23 @@ struct GetIMUDataStruct : BasePayloadStruct
 /* @brief Raw sensor data, used for calibration or logging. */
 struct GetRawIMUDataStruct : BasePayloadStruct
 {
-    /* @brief Accelerometer data in x, y and z in the interal format. */
+    /* @brief Accelerometer data in x, y and z in the internal format. */
     int16_t accelerometer[3];
 
-    /* @brief Gyroscope data in x, y and z in the interal format. */
+    /* @brief Gyroscope data in x, y and z in the internal format. */
     int16_t gyroscope[3];
 
-    /* @brief Magnetometer data in x, y and z in the interal format. */
+    /* @brief Magnetometer data in x, y and z in the internal format. */
     int16_t magnetometer[3];
 
-    /* @brief Temperature of the IMU interal format. */
+    /* @brief Temperature of the IMU internal format. */
     int16_t temperature;
 
-    /* @brief Pressure in the interal format. */
+    /* @brief Pressure in the internal format. */
     uint32_t pressure;
+
+    /* @brief Time stamp (internal clock) in nanoseconds. */
+    int64_t time_stamp_ns;
 
     GetRawIMUDataStruct(const std::vector<uint8_t> &payload)
     {
