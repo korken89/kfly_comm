@@ -170,11 +170,6 @@ namespace KFlyTelemetry
             ret = std::make_shared<GetEstimationAttitudeStruct>(payload);
             break;
 
-        case KFly_Command::Experiment:
-
-            ret = std::make_shared<ExperimentStruct>(payload);
-            break;
-
         default:
 
             ret = std::make_shared<BasePayloadStruct>();
@@ -241,7 +236,7 @@ namespace KFlyTelemetry
         _slip_parser.parse(payload);
     }
 
-    const std::vector<uint8_t>
+    std::vector<uint8_t>
         KFlyTelemetry::generatePacket(BasePayloadStruct &payload, bool ack)
     {
         std::vector<uint8_t> packet, slip_packet;
@@ -273,7 +268,7 @@ namespace KFlyTelemetry
         return slip_packet;
     }
 
-    const std::vector<uint8_t> KFlyTelemetry::generatePacket(
+    std::vector<uint8_t> KFlyTelemetry::generatePacket(
             const std::shared_ptr<BasePayloadStruct> &payload, bool ack)
     {
         std::vector<uint8_t> packet, slip_packet;

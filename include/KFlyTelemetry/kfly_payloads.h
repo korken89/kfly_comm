@@ -65,7 +65,7 @@ struct BasePayloadStruct
 
 
 template<class T>
-static std::vector<uint8_t> serialize(const T *data)
+inline std::vector<uint8_t> serialize(const T *data)
 {
     constexpr size_t bsize = sizeof(BasePayloadStruct);
 
@@ -76,7 +76,7 @@ static std::vector<uint8_t> serialize(const T *data)
 }
 
 template<class T>
-static std::vector<uint8_t> serialize(const T *data, const size_t size)
+inline std::vector<uint8_t> serialize(const T *data, const size_t size)
 {
     constexpr size_t bsize = sizeof(BasePayloadStruct);
 
@@ -87,7 +87,7 @@ static std::vector<uint8_t> serialize(const T *data, const size_t size)
 }
 
 template<class T>
-static void deserialize(T *data, const std::vector<uint8_t> &datagram)
+inline void deserialize(T *data, const std::vector<uint8_t> &datagram)
 {
     constexpr size_t bsize = sizeof(BasePayloadStruct);
 
@@ -648,31 +648,6 @@ struct GetEstimationAttitudeStruct : BasePayloadStruct
 
 struct GetEstimationAllStatesStruct : BasePayloadStruct
 {
-};
-
-/* @brief Experiment structure. */
-struct ExperimentStruct : BasePayloadStruct
-{
-    float acc_z;
-    float angular_rate[3];
-    float torque_ref[3];
-    float throttle_ref;
-    uint16_t cnt;
-
-    ExperimentStruct()
-    {
-        id = KFlyTelemetry::KFly_Command::Experiment;
-    }
-
-    /**
-     * @brief Converts a payload vector to a proper struct.
-     *
-     * @param[in] payload   The payload from the KFly including header.
-     */
-    ExperimentStruct(const std::vector<uint8_t> &payload)
-    {
-        deserialize<ExperimentStruct>(this, payload);
-    }
 };
 
 /* @brief Computer control data. */

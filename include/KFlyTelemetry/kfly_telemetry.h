@@ -139,7 +139,7 @@ public:
      *
      * @return A vector that holds the generated message.
      */
-    static const std::vector<uint8_t> generatePacket(BasePayloadStruct &payload,
+    static std::vector<uint8_t> generatePacket(BasePayloadStruct &payload,
                                                      bool ack);
 
     /**
@@ -150,7 +150,7 @@ public:
      *
      * @return A vector that holds the generated message.
      */
-    static const std::vector<uint8_t> generatePacket(
+    static std::vector<uint8_t> generatePacket(
             const std::shared_ptr<BasePayloadStruct> &payload,
             bool ack);
 };

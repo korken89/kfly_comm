@@ -40,7 +40,7 @@ int main()
     kft.parse( testPayload );
 
     /* Create a message for generation. */
-    std::shared_ptr<KFlyTelemetryPayload::BasePayloadStruct> ptr =
+    auto ptr =
         std::make_shared<KFlyTelemetryPayload::SetDeviceIDStruct>("test string");
 
     /* Generate the payload. */
