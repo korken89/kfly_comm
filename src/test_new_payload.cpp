@@ -5,6 +5,7 @@
 #include <type_traits>
 #include <cstring>
 #include <utility>
+#include <functional>
 
 template < std::size_t N >
 using serialized_array = std::array< uint8_t, N >;
@@ -107,6 +108,12 @@ void print_array(std::vector<uint8_t> arr)
     cout << "  " << static_cast<int>(b) << "\n";
 
   cout << "\n";
+}
+
+template <typename T>
+void registerCallback(std::function< void(T) > fun)
+{
+  // ???
 }
 
 int main()
