@@ -18,258 +18,214 @@
 *
 ****************************************************************************/
 
-#ifndef _KFLY_COMMANDS_H
-#define _KFLY_COMMANDS_H
+#pragma once
 
 #include <cstdint>
 
 namespace KFlyTelemetry
 {
-
 /* Command are from the view of KFly. */
 enum class KFly_Command : uint8_t
 {
-    /**
-     * @brief   The zero command is not allowed.
-     */
-    None                        = 0,
-    /**
-     * @brief   ACK command.
-     */
-    ACK                         = 1,
-    /**
-     * @brief   Ping command.
-     */
-    Ping                        = 2,
-    /**
-     * @brief   Send debug message command.
-     */
-    DebugMessage                = 3,
-    /**
-     * @brief   Get running mode command.
-     */
-    GetRunningMode              = 4,
-    /**
-     * @brief   Manage Subscriptions command.
-     */
-    ManageSubscriptions         = 5,
+  /**
+   * @brief   The zero command is not allowed.
+   */
+  None = 0,
+  /**
+   * @brief   ACK command.
+   */
+  ACK = 1,
+  /**
+   * @brief   Ping command.
+   */
+  Ping = 2,
+  /**
+   * @brief   Send debug message command.
+   */
+  DebugMessage = 3,
+  /**
+   * @brief   Get running mode command.
+   */
+  GetRunningMode = 4,
+  /**
+   * @brief   Manage Subscriptions command.
+   */
+  ManageSubscriptions = 5,
 
-    /*===============================================*/
-    /* Bootloader specific commands.                 */
-    /*===============================================*/
+  /*===============================================*/
+  /* Info, ID and Save commands.                   */
+  /*===============================================*/
 
-    /**
-     * @brief   Prepare to write firmware command.
-     * @note    Bootloader specific, shall always require ACK.
-     */
-    PrepareWriteFirmware        = 10,
-    /**
-     * @brief   Write firmware package command.
-     * @note    Bootloader specific, shall always require ACK.
-     */
-    WriteFirmwarePackage        = 11,
-    /**
-     * @brief   Write the last firmware package.
-     * @note    Bootloader specific, shall always require ACK.
-     */
-    WriteLastFirmwarePackage    = 12,
-    /**
-     * @brief   Read firmware package.
-     * @note    Bootloader specific, shall always require ACK.
-     */
-    ReadFirmwarePackage         = 13,
-    /**
-     * @brief   Read the last firmware package.
-     * @note    Bootloader specific, shall always require ACK.
-     */
-    ReadLastFirmwarePackage     = 14,
-    /**
-     * @brief   Next package command (sent to PC to resume transmission).
-     * @note    Bootloader specific, shall always require ACK.
-     */
-    NextPackage                 = 15,
-    /**
-     * @brief   Exit bootloader command.
-     * @note    Bootloader specific, shall always require ACK.
-     */
-    ExitBootloader              = 16,
+  /**
+   * @brief   Get system information.
+   */
+  GetSystemInformation = 17,
+  /**
+   * @brief   Set the user definable ID strings.
+   */
+  SetDeviceStrings = 18,
+  /**
+   * @brief   Save all settings to flash.
+   */
+  SaveToFlash = 19,
+  /**
+   * @brief   Erase flash.
+   */
+  EraseFlash = 20,
 
-    /*===============================================*/
-    /* Info, ID and Save commands.                   */
-    /*===============================================*/
+  /*===============================================*/
+  /* Controller specific commands.                 */
+  /*===============================================*/
 
-    /**
-     * @brief   Get device IDs.
-     */
-    GetDeviceInfo               = 17,
-    /**
-     * @brief   Set the user definable ID string.
-     */
-    SetDeviceID                 = 18,
-    /**
-     * @brief   Save all settings to flash.
-     */
-    SaveToFlash                 = 19,
-    /**
-     * @brief   Erase flash.
-     */
-    EraseFlash                  = 20,
+  /**
+   * @brief   Get contreller settings.
+   */
+  GetControllerLimits = 26,
+  /**
+   * @brief   Set controller settings.
+   */
+  SetControllerLimits = 27,
+  /**
+   * @brief   Get Arm Settings.
+   */
+  GetArmSettings = 28,
+  /**
+   * @brief   Set Arm Settings.
+   */
+  SetArmSettings = 29,
+  /**
+   * @brief   Get rate controller data.
+   */
+  GetRateControllerData = 30,
+  /**
+   * @brief   Set rate controller data.
+   */
+  SetRateControllerData = 31,
+  /**
+   * @brief   Get attitude controller data.
+   */
+  GetAttitudeControllerData = 32,
+  /**
+   * @brief   Set attitude controller data.
+   */
+  SetAttitudeControllerData = 33,
+  /**
+   * @brief   Get velocity controller data.
+   */
+  GetVelocityControllerData = 34,
+  /**
+   * @brief   Set velocity controller data.
+   */
+  SetVelocityControllerData = 35,
+  /**
+   * @brief   Get position controller data.
+   */
+  GetPositionControllerData = 36,
+  /**
+   * @brief   Set position controller data.
+   */
+  SetPositionControllerData = 37,
+  /**
+   * @brief   Get channel mixer.
+   */
+  GetChannelMix = 39,
+  /**
+   * @brief   Set channel mixer.
+   */
+  SetChannelMix = 40,
 
-    /*===============================================*/
-    /* Controller specific commands.                 */
-    /*===============================================*/
+  /*===============================================*/
+  /* RC specific commands.                         */
+  /*===============================================*/
 
-    /**
-     * @brief   Get contreller settings.
-     */
-    GetControllerLimits         = 26,
-    /**
-     * @brief   Set controller settings.
-     */
-    SetControllerLimits         = 27,
-    /**
-     * @brief   Get Arm Settings.
-     */
-    GetArmSettings              = 28,
-    /**
-     * @brief   Set Arm Settings.
-     */
-    SetArmSettings              = 29,
-    /**
-     * @brief   Get rate controller data.
-     */
-    GetRateControllerData       = 30,
-    /**
-     * @brief   Set rate controller data.
-     */
-    SetRateControllerData       = 31,
-    /**
-     * @brief   Get attitude controller data.
-     */
-    GetAttitudeControllerData   = 32,
-    /**
-     * @brief   Set attitude controller data.
-     */
-    SetAttitudeControllerData   = 33,
-    /**
-     * @brief   Get velocity controller data.
-     */
-    GetVelocityControllerData   = 34,
-    /**
-     * @brief   Set velocity controller data.
-     */
-    SetVelocityControllerData   = 35,
-    /**
-     * @brief   Get position controller data.
-     */
-    GetPositionControllerData   = 36,
-    /**
-     * @brief   Set position controller data.
-     */
-    SetPositionControllerData   = 37,
-    /**
-     * @brief   Get channel mixer.
-     */
-    GetChannelMix               = 39,
-    /**
-     * @brief   Set channel mixer.
-     */
-    SetChannelMix               = 40,
+  /**
+   * @brief   Get RC input settings.
+   */
+  GetRCInputSettings = 41,
+  /**
+   * @brief   Set RC input settings.
+   */
+  SetRCInputSettings = 42,
+  /**
+   * @brief   Get RC input settings.
+   */
+  GetRCOutputSettings = 43,
+  /**
+   * @brief   Set RC input settings.
+   */
+  SetRCOutputSettings = 44,
+  /**
+   * @brief   Get RC values.
+   */
+  GetRCValues = 45,
 
-    /*===============================================*/
-    /* RC specific commands.                         */
-    /*===============================================*/
+  /*===============================================*/
+  /* Sensor specific commands.                     */
+  /*===============================================*/
 
-    /**
-     * @brief   Get RC input settings.
-     */
-    GetRCInputSettings          = 41,
-    /**
-     * @brief   Set RC input settings.
-     */
-    SetRCInputSettings          = 42,
-    /**
-     * @brief   Get RC input settings.
-     */
-    GetRCOutputSettings         = 43,
-    /**
-     * @brief   Set RC input settings.
-     */
-    SetRCOutputSettings         = 44,
-    /**
-     * @brief   Get RC values.
-     */
-    GetRCValues                 = 45,
+  /**
+   * @brief   Get calibrated IMU data.
+   */
+  GetIMUData = 46,
+  /**
+   * @brief   Get raw IMU data.
+   */
+  GetRawIMUData = 47,
+  /**
+   * @brief   Get IMU calibration.
+   */
+  GetIMUCalibration = 48,
+  /**
+   * @brief   Set IMU calibration.
+   */
+  SetIMUCalibration = 49,
 
-    /*===============================================*/
-    /* Sensor specific commands.                     */
-    /*===============================================*/
+  /*===============================================*/
+  /* Estimation specific commands.                 */
+  /*===============================================*/
 
-    /**
-     * @brief   Get calibrated IMU data.
-     */
-    GetIMUData                  = 46,
-    /**
-     * @brief   Get raw IMU data.
-     */
-    GetRawIMUData               = 47,
-    /**
-     * @brief   Get IMU calibration.
-     */
-    GetIMUCalibration           = 48,
-    /**
-     * @brief   Set IMU calibration.
-     */
-    SetIMUCalibration           = 49,
+  /**
+   * @brief   Get rate estimation.
+   */
+  GetEstimationRate = 50,
+  /**
+   * @brief   Get attitude estimation.
+   */
+  GetEstimationAttitude = 51,
+  /**
+   * @brief   Get velocity estimation.
+   */
+  GetEstimationVelocity = 52,
+  /**
+   * @brief   Get position estimation.
+   */
+  GetEstimationPosition = 53,
+  /**
+   * @brief   Get all states.
+   */
+  GetEstimationAllStates = 54,
+  /**
+   * @brief   Reset estimation.
+   */
+  ResetEstimation = 55,
 
-    /*===============================================*/
-    /* Estimation specific commands.                 */
-    /*===============================================*/
+  /*===============================================*/
+  /* Computer control specific commands.           */
+  /*===============================================*/
 
-    /**
-     * @brief   Get rate estimation.
-     */
-    GetEstimationRate           = 50,
-    /**
-     * @brief   Get attitude estimation.
-     */
-    GetEstimationAttitude       = 51,
-    /**
-     * @brief   Get velocity estimation.
-     */
-    GetEstimationVelocity       = 52,
-    /**
-     * @brief   Get position estimation.
-     */
-    GetEstimationPosition       = 53,
-    /**
-     * @brief   Get all states.
-     */
-    GetEstimationAllStates      = 54,
-    /**
-     * @brief   Reset estimation.
-     */
-    ResetEstimation             = 55,
+  /**
+   * @brief   New control reference from the PC side.
+   */
+  ComputerControlReference = 126,
 
-    /*===============================================*/
-    /* Computer control specific commands.           */
-    /*===============================================*/
+  /*===============================================*/
+  /* Motion capture frame specific commands.       */
+  /*===============================================*/
 
-    /**
-     * @brief   New control reference from the PC side.
-     */
-    ComputerControlReference    = 126,
-
-    /*===============================================*/
-    /* Motion capture frame specific commands.       */
-    /*===============================================*/
-
-    /**
-     * @brief   New motion capture measurement.
-     */
-    MotionCaptureMeasurement    = 127
+  /**
+   * @brief   New motion capture measurement.
+   */
+  MotionCaptureMeasurement = 127
 };
-
 }
 
-#endif

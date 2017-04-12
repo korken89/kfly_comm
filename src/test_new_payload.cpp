@@ -7,13 +7,21 @@
 #include <utility>
 
 template < std::size_t N >
-using serialized_payload = std::array< uint8_t, N >;
+using serialized_array = std::array< uint8_t, N >;
 
+template <typename T>
+using make_serialized_array = serialized_array< sizeof(T) >;
 
 template < typename T >
 struct serializable_payload
 {
+  /* POD forces a default constructor. */
   static_assert(std::is_pod< T >::value == true, "Datagram need to be POD.");
+
+  /* Trivially copyable guarantees correct operation for std::memcpy. */
+  static_assert(std::is_trivially_copyable< T >::value == true,
+                "Datagram need to be trivially copyable.");
+
 
   T datagram;
 
@@ -24,23 +32,23 @@ struct serializable_payload
 
   /* Payload creation from serialized data. */
   template < std::size_t N >
-  constexpr serializable_payload(serialized_payload< N > &data) noexcept
+  constexpr serializable_payload(serialized_array< N > &data) noexcept
   {
-    static_assert(N == sizeof(T), "Serialized payload has wrong size");
+    static_assert(N == sizeof(T), "Input serialized_array has wrong size.");
     std::memcpy(&datagram, data.data(), sizeof(T));
   }
 
   constexpr auto serialize() const noexcept
   {
-    serialized_payload< sizeof(T) > buffer;
+    make_serialized_array< T > buffer;
     std::memcpy(buffer.data(), &datagram, sizeof(T));
     return buffer;
   }
 
   template < std::size_t N >
-  constexpr void serialize(serialized_payload< N > &buffer) const noexcept
+  constexpr void serialize(serialized_array< N > &buffer) const noexcept
   {
-    static_assert(N == sizeof(T), "Output buffer has wrong size");
+    static_assert(N == sizeof(T), "Output serialized_array has wrong size.");
     std::memcpy(buffer.data(), &datagram, sizeof(T));
   }
 
@@ -49,7 +57,7 @@ struct serializable_payload
     return sizeof(T);
   }
 
-  constexpr auto&& getDatagram() const noexcept
+  constexpr auto getDatagram() const noexcept
   {
     return std::move(datagram);
   }
@@ -59,13 +67,14 @@ struct serializable_payload
 
 struct data1
 {
-  float a, b;
+  int a, b;
 };
 
 struct data2
 {
   char a, b, c;
-  int i;
+  unsigned int i;
+  bool bl;
 };
 
 #pragma pack(pop)
@@ -78,13 +87,19 @@ int main()
   using namespace std;
 
   d1 test1(data1{1, 2});
-  d2 test2(data2{'a', 'b', 'c', 13});
+  d2 test2(data2{'a', 'b', 'c', 0xdeadbeef});
 
-  auto ser = test2.serialize();
+  auto ser1 = test1.serialize();
+  auto ser2 = test2.serialize();
 
-  d2 test3(ser);
+  d1 test3(ser1);
+  d2 test4(ser2);
 
-  auto datagram = test3.getDatagram();
+  auto datagram1 = test3.getDatagram();
+  auto datagram2 = test4.getDatagram();
+
+  (void)datagram1;
+  (void)datagram2;
 
   cout << "d1 size: " << sizeof(d1) << "\n";
   cout << "d2 size: " << sizeof(d2) << "\n";

@@ -29,7 +29,7 @@ find_package(catkin QUIET)
 ########################################
 # Enable C++11 and other C++ flags
 ########################################
-set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "-std=c++14 ${CMAKE_CXX_FLAGS}")
 
 ########################################
 # catkin requirements
@@ -51,8 +51,7 @@ include_directories(${catkin_INCLUDE_DIRS}
                     lib)
 
 add_library(${PROJECT_NAME} STATIC
-            src/kfly_telemetry.cpp
-            src/crc.cpp)
+            src/kfly_telemetry.cpp)
 
 
 if (catkin_FOUND)
