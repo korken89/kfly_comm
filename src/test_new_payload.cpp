@@ -6,6 +6,8 @@
 #include <cstring>
 #include <utility>
 #include <functional>
+#include <tuple>
+#include <algorithm>
 
 template < std::size_t N >
 using serialized_array = std::array< uint8_t, N >;
@@ -70,6 +72,12 @@ struct serializable_payload
   }
 };
 
+
+//
+// -----------------------------------------------------------------------
+//
+
+
 #pragma pack(push, 1)
 
 struct data1
@@ -86,35 +94,78 @@ struct data2
 
 #pragma pack(pop)
 
+
+//
+// -----------------------------------------------------------------------
+//
+
+
+namespace datagram_callback
+{
+template <typename T>
+using make_element = std::vector< std::function< void(T) > >;
+
+template <typename... Ts>
+using tuple = std::tuple< make_element<Ts> ... >;
+
+template <typename T, typename... Ts>
+constexpr auto& get(tuple<Ts...> &p)
+{
+  return std::get< datagram_callback::make_element<T> >(p);
+}
+
+}
+
+using dt = datagram_callback::tuple<data1, data2>;
+
+//
+// -----------------------------------------------------------------------
+//
+
 using d1 = serializable_payload< data1 >;
 using d2 = serializable_payload< data2 >;
 
-template <typename T, std::size_t N>
-void print_array(std::array<T, N> arr)
-{
-  using namespace std;
+//
+// -----------------------------------------------------------------------
+//
 
-  for (auto b : arr)
-    cout << "  " << static_cast<int>(b) << "\n";
-
-  cout << "\n";
-}
-
-void print_array(std::vector<uint8_t> arr)
-{
-  using namespace std;
-
-  for (auto b : arr)
-    cout << "  " << static_cast<int>(b) << "\n";
-
-  cout << "\n";
-}
+dt datagram_holder;
 
 template <typename T>
 void registerCallback(std::function< void(T) > fun)
 {
-  // ???
+  datagram_callback::get<T>(datagram_holder).push_back( fun );
 }
+
+template <typename T>
+void executeCallback(const T &data)
+{
+  auto callbacks =
+    datagram_callback::get<T>(datagram_holder);
+
+  for (auto callback : callbacks)
+    callback(data);
+}
+
+//
+// -----------------------------------------------------------------------
+//
+
+void cbd1(data1)
+{
+  using namespace std;
+  cout << "Data1\n";
+}
+
+void cbd2(data2)
+{
+  using namespace std;
+  cout << "Data2\n";
+}
+
+//
+// -----------------------------------------------------------------------
+//
 
 int main()
 {
@@ -125,8 +176,6 @@ int main()
 
   auto ser1 = test1.serialize();
   auto ser2 = test2.serialize();
-  std::vector<uint8_t> test;
-  test1.serialize(test);
 
   d1 test3(ser1);
   d2 test4(ser2);
@@ -134,19 +183,11 @@ int main()
   auto datagram1 = test3.getDatagram();
   auto datagram2 = test4.getDatagram();
 
-  (void)datagram1;
-  (void)datagram2;
+  registerCallback<data1>(cbd1);
+  registerCallback<data2>(cbd2);
 
-
-  cout << "d1 size: " << sizeof(d1) << "\n";
-  cout << "d2 size: " << sizeof(d2) << "\n\n";
-
-  cout << "ser1:\n";
-  print_array(ser1);
-  cout << "ser1:\n";
-  print_array(test);
-  cout << "ser2:\n";
-  print_array(ser2);
+  executeCallback(datagram1);
+  executeCallback(datagram2);
 
   return 0;
 }
