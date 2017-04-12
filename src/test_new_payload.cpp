@@ -52,6 +52,12 @@ struct serializable_payload
     std::memcpy(buffer.data(), &datagram, sizeof(T));
   }
 
+  constexpr void serialize(std::vector<uint8_t> &buffer) const noexcept
+  {
+    auto data = serialize();
+    buffer = std::vector<uint8_t>(data.data(), data.data() + data.size());
+  }
+
   constexpr auto size() const noexcept
   {
     return sizeof(T);
@@ -72,7 +78,7 @@ struct data1
 
 struct data2
 {
-  char a, b, c;
+  char a, b;
   unsigned int i;
   bool bl;
 };
@@ -82,15 +88,38 @@ struct data2
 using d1 = serializable_payload< data1 >;
 using d2 = serializable_payload< data2 >;
 
+template <typename T, std::size_t N>
+void print_array(std::array<T, N> arr)
+{
+  using namespace std;
+
+  for (auto b : arr)
+    cout << "  " << static_cast<int>(b) << "\n";
+
+  cout << "\n";
+}
+
+void print_array(std::vector<uint8_t> arr)
+{
+  using namespace std;
+
+  for (auto b : arr)
+    cout << "  " << static_cast<int>(b) << "\n";
+
+  cout << "\n";
+}
+
 int main()
 {
   using namespace std;
 
   d1 test1(data1{1, 2});
-  d2 test2(data2{'a', 'b', 'c', 0xdeadbeef});
+  d2 test2(data2{'a', 'b', 1, true});
 
   auto ser1 = test1.serialize();
   auto ser2 = test2.serialize();
+  std::vector<uint8_t> test;
+  test1.serialize(test);
 
   d1 test3(ser1);
   d2 test4(ser2);
@@ -101,8 +130,16 @@ int main()
   (void)datagram1;
   (void)datagram2;
 
+
   cout << "d1 size: " << sizeof(d1) << "\n";
-  cout << "d2 size: " << sizeof(d2) << "\n";
+  cout << "d2 size: " << sizeof(d2) << "\n\n";
+
+  cout << "ser1:\n";
+  print_array(ser1);
+  cout << "ser1:\n";
+  print_array(test);
+  cout << "ser2:\n";
+  print_array(ser2);
 
   return 0;
 }
