@@ -12,7 +12,7 @@
 template < std::size_t N >
 using serialized_array = std::array< uint8_t, N >;
 
-template <typename T>
+template < typename T >
 using make_serialized_array = serialized_array< sizeof(T) >;
 
 template < typename T >
@@ -25,11 +25,11 @@ struct serializable_payload
   static_assert(std::is_trivially_copyable< T >::value == true,
                 "Datagram need to be trivially copyable.");
 
-
   T datagram;
 
   /* Payload creation from data. */
-  constexpr serializable_payload(T &&datagram) noexcept : datagram{std::move(datagram)}
+  constexpr serializable_payload(T &&datagram) noexcept
+      : datagram{std::move(datagram)}
   {
   }
 
@@ -55,10 +55,10 @@ struct serializable_payload
     std::memcpy(buffer.data(), &datagram, sizeof(T));
   }
 
-  constexpr void serialize(std::vector<uint8_t> &buffer) const noexcept
+  constexpr void serialize(std::vector< uint8_t > &buffer) const noexcept
   {
     auto data = serialize();
-    buffer = std::vector<uint8_t>(data.data(), data.data() + data.size());
+    buffer    = std::vector< uint8_t >(data.data(), data.data() + data.size());
   }
 
   constexpr auto size() const noexcept
@@ -72,11 +72,9 @@ struct serializable_payload
   }
 };
 
-
 //
 // -----------------------------------------------------------------------
 //
-
 
 #pragma pack(push, 1)
 
@@ -94,29 +92,26 @@ struct data2
 
 #pragma pack(pop)
 
-
 //
 // -----------------------------------------------------------------------
 //
 
-
 namespace datagram_callback
 {
-template <typename T>
+template < typename T >
 using make_element = std::vector< std::function< void(T) > >;
 
-template <typename... Ts>
-using tuple = std::tuple< make_element<Ts> ... >;
+template < typename... Ts >
+using tuple = std::tuple< make_element< Ts >... >;
 
-template <typename T, typename... Ts>
-constexpr auto& get(tuple<Ts...> &p)
+template < typename T, typename... Ts >
+constexpr auto &get(tuple< Ts... > &p)
 {
-  return std::get< datagram_callback::make_element<T> >(p);
+  return std::get< datagram_callback::make_element< T > >(p);
+}
 }
 
-}
-
-using dt = datagram_callback::tuple<data1, data2>;
+using dt = datagram_callback::tuple< data1, data2 >;
 
 //
 // -----------------------------------------------------------------------
@@ -131,17 +126,29 @@ using d2 = serializable_payload< data2 >;
 
 dt datagram_holder;
 
-template <typename T>
-void registerCallback(std::function< void(T) > fun)
+template < typename T >
+void registerCallback(void(&&fun)(T))
 {
-  datagram_callback::get<T>(datagram_holder).push_back( fun );
+  using namespace std;
+  cout << "Register ptr\n";
+
+  datagram_callback::get< T >(datagram_holder)
+      .emplace_back(std::function< void(T) >(fun));
 }
 
-template <typename T>
+template < typename T >
+void registerCallback(std::function< void(T) > &&fun)
+{
+  using namespace std;
+  cout << "Register fun\n";
+
+  datagram_callback::get< T >(datagram_holder).emplace_back(fun);
+}
+
+template < typename T >
 void executeCallback(const T &data)
 {
-  auto callbacks =
-    datagram_callback::get<T>(datagram_holder);
+  auto callbacks = datagram_callback::get< T >(datagram_holder);
 
   for (auto callback : callbacks)
     callback(data);
@@ -183,12 +190,11 @@ int main()
   auto datagram1 = test3.getDatagram();
   auto datagram2 = test4.getDatagram();
 
-  registerCallback<data1>(cbd1);
-  registerCallback<data2>(cbd2);
+  registerCallback(cbd1);
+  registerCallback(std::function< void(data2) >(cbd2));
 
   executeCallback(datagram1);
   executeCallback(datagram2);
 
   return 0;
 }
-
