@@ -117,23 +117,17 @@ private:
 
   callback_tuple< data1, data2 > callbacks;
 
-  template < typename T1, typename T2 >
-  constexpr auto &get(T2 &p)
-  {
-    return std::get< make_element< T1 > >(p);
-  }
-
 public:
   template < typename T >
   void register_callback(function_ptr< T > fun)
   {
-    get< T >(callbacks).emplace_back(fun);
+    std::get< make_element< T > >(callbacks).emplace_back(fun);
   }
 
   template < typename T >
   void release_callback(function_ptr< T > fun)
   {
-    auto &list_cb = get< T >(callbacks);
+    auto& list_cb = std::get< make_element< T > >(callbacks);
 
     list_cb.erase(
         std::remove_if(list_cb.begin(), list_cb.end(),
@@ -144,7 +138,7 @@ public:
   template < typename T >
   void execute_callback(const T &data)
   {
-    auto get_callbacks = get< T >(callbacks);
+    auto& get_callbacks = std::get< make_element< T > >(callbacks);
 
     for (auto callback : get_callbacks)
       callback(data);
