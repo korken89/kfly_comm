@@ -116,10 +116,10 @@ private:
 
   callback_tuple< data1, data2 > callbacks;
 
-  template < typename T >
-  constexpr auto &get(callback_tuple< Datagrams... > &p)
+  template < typename T1, typename T2 >
+  constexpr auto &get(T2 &p)
   {
-    return std::get< make_element< T > >(p);
+    return std::get< make_element< T1 > >(p);
   }
 
 public:
