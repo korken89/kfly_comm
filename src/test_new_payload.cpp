@@ -104,12 +104,13 @@ struct data2
 template < typename... Datagrams >
 class datagram_callback
 {
+public:
+  template < typename T >
+  using function_ptr = void (*)(T);
+
 private:
   template < typename T >
-  using function_ref = void (*)(T);
-
-  template < typename T >
-  using make_element = std::vector< function_ref< T > >;
+  using make_element = std::vector< function_ptr< T > >;
 
   template < typename... Ts >
   using callback_tuple = std::tuple< make_element< Datagrams >... >;
@@ -124,19 +125,19 @@ private:
 
 public:
   template < typename T >
-  void bind_callback(function_ref< T > fun)
+  void register_callback(function_ptr< T > fun)
   {
     get< T >(callbacks).emplace_back(fun);
   }
 
   template < typename T >
-  void release_callback(function_ref< T > fun)
+  void release_callback(function_ptr< T > fun)
   {
     auto &list_cb = get< T >(callbacks);
 
     list_cb.erase(
         std::remove_if(list_cb.begin(), list_cb.end(),
-                       [&](function_ref< T > l_fun) { return fun == l_fun; }),
+                       [&](function_ptr< T > l_fun) { return fun == l_fun; }),
         list_cb.end());
   }
 
@@ -209,9 +210,9 @@ int main()
   auto datagram1 = test3.get_datagram();
   auto datagram2 = test4.get_datagram();
 
-  cb.bind_callback(callback_d1);
-  cb.bind_callback(callback_d11);
-  cb.bind_callback(callback_d2);
+  cb.register_callback(callback_d1);
+  cb.register_callback(callback_d11);
+  cb.register_callback(callback_d2);
 
   cb.execute_callback(datagram1);
   cb.execute_callback(datagram2);
