@@ -68,7 +68,7 @@ struct serializable_payload
     return sizeof(T);
   }
 
-  constexpr auto getDatagram() const noexcept
+  constexpr auto get_datagram() const noexcept
   {
     return std::move(datagram);
   }
@@ -183,8 +183,8 @@ int main()
   d1 test3(ser1);
   d2 test4(ser2);
 
-  auto datagram1 = test3.getDatagram();
-  auto datagram2 = test4.getDatagram();
+  auto datagram1 = test3.get_datagram();
+  auto datagram2 = test4.get_datagram();
 
   registerCallback(cbd1);
   registerCallback(std::function< void(data2) >(cbd2));
