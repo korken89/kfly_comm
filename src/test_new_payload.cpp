@@ -8,6 +8,7 @@
 #include <functional>
 #include <tuple>
 #include <algorithm>
+#include <exception>
 
 template < std::size_t N >
 using serialized_array = std::array< uint8_t, N >;
@@ -41,18 +42,20 @@ struct serializable_payload
     std::memcpy(&datagram, data.data(), sizeof(T));
   }
 
+  /* Payload creation from serialized (vector) data. */
+  constexpr serializable_payload(const std::vector< uint8_t > &data)
+  {
+    if (data.size() == sizeof(T))
+      std::memcpy(&datagram, data.data(), sizeof(T));
+    else
+      throw std::invalid_argument("Vector size is not the same as datagram.");
+  }
+
   constexpr auto serialize() const noexcept
   {
     make_serialized_array< T > buffer;
     std::memcpy(buffer.data(), &datagram, sizeof(T));
     return buffer;
-  }
-
-  template < std::size_t N >
-  constexpr void serialize(serialized_array< N > &buffer) const noexcept
-  {
-    static_assert(N == sizeof(T), "Output serialized_array has wrong size.");
-    std::memcpy(buffer.data(), &datagram, sizeof(T));
   }
 
   constexpr void serialize(std::vector< uint8_t > &buffer) const noexcept
@@ -70,7 +73,7 @@ struct serializable_payload
 
   constexpr auto get_datagram() const noexcept
   {
-    return std::move(datagram);
+    return datagram;
   }
 };
 
@@ -98,22 +101,54 @@ struct data2
 // -----------------------------------------------------------------------
 //
 
-namespace datagram_callback
+template < typename... Datagrams >
+class datagram_callback
 {
-template < typename T >
-using make_element = std::vector< std::function< void(T) > >;
+private:
+  template < typename T >
+  using function_ref = void (*)(T);
 
-template < typename... Ts >
-using tuple = std::tuple< make_element< Ts >... >;
+  template < typename T >
+  using make_element = std::vector< function_ref< T > >;
 
-template < typename T, typename... Ts >
-constexpr auto &get(tuple< Ts... > &p)
-{
-  return std::get< datagram_callback::make_element< T > >(p);
-}
-}
+  template < typename... Ts >
+  using callback_tuple = std::tuple< make_element< Datagrams >... >;
 
-using dt = datagram_callback::tuple< data1, data2 >;
+  callback_tuple< data1, data2 > callbacks;
+
+  template < typename T >
+  constexpr auto &get(callback_tuple< Datagrams... > &p)
+  {
+    return std::get< make_element< T > >(p);
+  }
+
+public:
+  template < typename T >
+  void bind_callback(function_ref< T > fun)
+  {
+    get< T >(callbacks).emplace_back(fun);
+  }
+
+  template < typename T >
+  void release_callback(function_ref< T > fun)
+  {
+    auto &list_cb = get< T >(callbacks);
+
+    list_cb.erase(
+        std::remove_if(list_cb.begin(), list_cb.end(),
+                       [&](function_ref< T > l_fun) { return fun == l_fun; }),
+        list_cb.end());
+  }
+
+  template < typename T >
+  void execute_callback(const T &data)
+  {
+    auto get_callbacks = get< T >(callbacks);
+
+    for (auto callback : get_callbacks)
+      callback(data);
+  }
+};
 
 //
 // -----------------------------------------------------------------------
@@ -126,41 +161,23 @@ using d2 = serializable_payload< data2 >;
 // -----------------------------------------------------------------------
 //
 
-dt datagram_callbacks;
-
-template < typename T >
-void registerCallback(void(&&fun)(T))
-{
-  datagram_callback::get< T >(datagram_callbacks)
-      .emplace_back(std::function< void(T) >(fun));
-}
-
-template < typename T >
-void registerCallback(std::function< void(T) > &&fun)
-{
-  datagram_callback::get< T >(datagram_callbacks).emplace_back(fun);
-}
-
-template < typename T >
-void executeCallback(const T &data)
-{
-  auto callbacks = datagram_callback::get< T >(datagram_callbacks);
-
-  for (auto callback : callbacks)
-    callback(data);
-}
-
 //
 // -----------------------------------------------------------------------
 //
 
-void cbd1(data1)
+void callback_d1(data1)
 {
   using namespace std;
   cout << "Data1\n";
 }
 
-void cbd2(data2)
+void callback_d11(data1)
+{
+  using namespace std;
+  cout << "Data11\n";
+}
+
+void callback_d2(data2)
 {
   using namespace std;
   cout << "Data2\n";
@@ -174,23 +191,35 @@ int main()
 {
   using namespace std;
 
+  datagram_callback< data1, data2 > cb;
+
   d1 test1(data1{1, 2});
   d2 test2(data2{'a', 'b', 1, true});
 
   auto ser1 = test1.serialize();
   auto ser2 = test2.serialize();
+  vector< uint8_t > ser_vec;
+  test1.serialize(ser_vec);
 
   d1 test3(ser1);
   d2 test4(ser2);
 
+  d1 test5(ser_vec);
+
   auto datagram1 = test3.get_datagram();
   auto datagram2 = test4.get_datagram();
 
-  registerCallback(cbd1);
-  registerCallback(std::function< void(data2) >(cbd2));
+  cb.bind_callback(callback_d1);
+  cb.bind_callback(callback_d11);
+  cb.bind_callback(callback_d2);
 
-  executeCallback(datagram1);
-  executeCallback(datagram2);
+  cb.execute_callback(datagram1);
+  cb.execute_callback(datagram2);
+
+  cb.release_callback(callback_d1);
+
+  cb.execute_callback(datagram1);
+  cb.execute_callback(datagram2);
 
   return 0;
 }
