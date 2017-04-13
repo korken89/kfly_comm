@@ -57,8 +57,10 @@ struct serializable_payload
 
   constexpr void serialize(std::vector< uint8_t > &buffer) const noexcept
   {
-    auto data = serialize();
-    buffer    = std::vector< uint8_t >(data.data(), data.data() + data.size());
+    auto serial_data = serialize();
+
+    buffer = std::vector< uint8_t >(serial_data.data(),
+                                    serial_data.data() + serial_data.size());
   }
 
   constexpr auto size() const noexcept
@@ -124,31 +126,25 @@ using d2 = serializable_payload< data2 >;
 // -----------------------------------------------------------------------
 //
 
-dt datagram_holder;
+dt datagram_callbacks;
 
 template < typename T >
 void registerCallback(void(&&fun)(T))
 {
-  using namespace std;
-  cout << "Register ptr\n";
-
-  datagram_callback::get< T >(datagram_holder)
+  datagram_callback::get< T >(datagram_callbacks)
       .emplace_back(std::function< void(T) >(fun));
 }
 
 template < typename T >
 void registerCallback(std::function< void(T) > &&fun)
 {
-  using namespace std;
-  cout << "Register fun\n";
-
-  datagram_callback::get< T >(datagram_holder).emplace_back(fun);
+  datagram_callback::get< T >(datagram_callbacks).emplace_back(fun);
 }
 
 template < typename T >
 void executeCallback(const T &data)
 {
-  auto callbacks = datagram_callback::get< T >(datagram_holder);
+  auto callbacks = datagram_callback::get< T >(datagram_callbacks);
 
   for (auto callback : callbacks)
     callback(data);
