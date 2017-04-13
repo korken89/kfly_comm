@@ -6,15 +6,9 @@
 #include <cstring>
 #include <utility>
 #include <functional>
-#include <tuple>
-#include <algorithm>
 #include <exception>
 
-template < std::size_t N >
-using serialized_array = std::array< uint8_t, N >;
-
-template < typename T >
-using make_serialized_array = serialized_array< sizeof(T) >;
+#include "datagram_director.hpp"
 
 template < typename T >
 struct serializable_payload
@@ -25,6 +19,20 @@ struct serializable_payload
   /* Trivially copyable guarantees correct operation for std::memcpy. */
   static_assert(std::is_trivially_copyable< T >::value == true,
                 "Datagram need to be trivially copyable.");
+
+  /**
+   * @brief
+   *
+   * @param[in]
+   * @tparam
+   *
+   * @return
+   */
+  template < std::size_t N >
+  using serialized_array = std::array< uint8_t, N >;
+
+  using make_serialized_array = serialized_array< sizeof(T) >;
+
 
   T datagram;
 
@@ -53,7 +61,7 @@ struct serializable_payload
 
   constexpr auto serialize() const noexcept
   {
-    make_serialized_array< T > buffer;
+    make_serialized_array buffer;
     std::memcpy(buffer.data(), &datagram, sizeof(T));
     return buffer;
   }
@@ -101,65 +109,6 @@ struct data2
 // -----------------------------------------------------------------------
 //
 
-template < typename... Datagrams >
-class datagram_callback
-{
-public:
-  template < typename T >
-  using function_ptr = void (*)(T);
-
-private:
-  template < typename T >
-  using make_element = std::vector< function_ptr< T > >;
-
-  template < typename... Ts >
-  using callback_tuple = std::tuple< make_element< Datagrams >... >;
-
-  callback_tuple< data1, data2 > callbacks;
-
-public:
-  template < typename T >
-  void register_callback(function_ptr< T > fun)
-  {
-    std::get< make_element< T > >(callbacks).emplace_back(fun);
-  }
-
-  template < typename T >
-  void release_callback(function_ptr< T > fun)
-  {
-    auto& list_cb = std::get< make_element< T > >(callbacks);
-
-    list_cb.erase(
-        std::remove_if(list_cb.begin(), list_cb.end(),
-                       [&](function_ptr< T > l_fun) { return fun == l_fun; }),
-        list_cb.end());
-  }
-
-  template < typename T >
-  void execute_callback(const T &data)
-  {
-    auto& get_callbacks = std::get< make_element< T > >(callbacks);
-
-    for (auto callback : get_callbacks)
-      callback(data);
-  }
-};
-
-//
-// -----------------------------------------------------------------------
-//
-
-using d1 = serializable_payload< data1 >;
-using d2 = serializable_payload< data2 >;
-
-//
-// -----------------------------------------------------------------------
-//
-
-//
-// -----------------------------------------------------------------------
-//
-
 void callback_d1(data1)
 {
   using namespace std;
@@ -186,7 +135,10 @@ int main()
 {
   using namespace std;
 
-  datagram_callback< data1, data2 > cb;
+  using d1 = serializable_payload< data1 >;
+  using d2 = serializable_payload< data2 >;
+
+  datagram_director< data1, data2 > cb;
 
   d1 test1(data1{1, 2});
   d2 test2(data2{'a', 'b', 1, true});
