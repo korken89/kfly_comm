@@ -41,6 +41,13 @@ struct serializable_datagram
   Datagram datagram;
 
   /**
+   * @brief   Default constructor.
+   */
+  constexpr serializable_datagram() noexcept
+  {
+  }
+
+  /**
    * @brief   Constructor from a datagram object.
    *
    * @param[in] datagram  The datagram to serialize.
