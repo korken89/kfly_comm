@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <package>
-  <name>kflytelemetry</name>
+  <name>kfly_comm</name>
   <version>0.0.1</version>
   <description>
     A library for communicating the KFly auto pilot.
   </description>
 
   <maintainer email="emil.fresk@gmail.com">Emil Fresk</maintainer>
-  <license>LGPLv3</license>
+  <license>BSL-1.0</license>
   <author email="emil.fresk@gmail.com">Emil Fresk</author>
   <buildtool_depend>catkin</buildtool_depend>
 

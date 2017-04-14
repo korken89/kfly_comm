@@ -1,8 +1,11 @@
+//          Copyright Emil Fresk 2016 - 2017
+// Distributed under the Boost Software License, Version 1.0.
+//    (See accompanying file LICENSE_1_0.txt or copy at
+//          http://www.boost.org/LICENSE_1_0.txt)
 
 #include <iostream>
-
-#include "datagram_director.hpp"
-#include "serializable_datagram.hpp"
+#include "kfly_comm/datagram_director.hpp"
+#include "kfly_comm/serializable_datagram.hpp"
 
 
 //
