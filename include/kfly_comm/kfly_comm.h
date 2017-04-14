@@ -42,30 +42,45 @@ private:
   /** @brief Lock for the parser. */
   std::mutex _parser_lock;
 
-  /**
-   * @brief   Calls all the registered callbacks with the data payload.
-   *
-   * @param[in] payload   The payload to be sent.
-   */
-  //void executeCallbacks(std::shared_ptr< BasePayloadStruct > payload);
+  /** @brief Datagram director for the callbacks and registered datagrams. */
+  datagram_director<
+                     datagrams::Ack,
+                     datagrams::Ping,
+                     datagrams::GetRunningMode,
+                     datagrams::ManageSubscription,
+                     datagrams::GetSystemInformation,
+                     datagrams::SetDeviceStrings,
+                     datagrams::ControllerLimits,
+                     datagrams::ArmSettings,
+                     datagrams::ControllerData,
+                     datagrams::ChannelMix,
+                     datagrams::RCInputSettings,
+                     datagrams::RCOutputSettings,
+                     datagrams::GetRCValues,
+                     datagrams::GetIMUData,
+                     datagrams::GetRawIMUData,
+                     datagrams::IMUCalibration,
+                     datagrams::GetEstimationAttitude,
+                     datagrams::GetEstimationAllStates,
+                     datagrams::ComputerControlReference,
+                     datagrams::MotionCaptureFrame
+                   > _callbacks;
 
   /**
    * @brief   Parses a payload and, if correct, runs executeCallbacks.
    *
    * @param[in] payload   The payload to be parsed.
    */
-  void parseKFlyPacket(const std::vector< uint8_t > &payload);
+  void parse_packet(const std::vector< uint8_t > &payload);
 
   /**
    * @brief   Checks the command to apply the proper structure.
    *
    * @param[in] cmd       Command byte from the packet.
-   * @param[in] payload   The payload to be parsed, without header or CRC.
-   *
-   * @return A BasePayloadStruct that holds the parsed message.
+   * @param[in] payload   The payload to be parsed, without header and CRC.
    */
-  //std::shared_ptr< BasePayloadStruct > payloadToStruct(
-  //    const uint8_t cmd, const std::vector< uint8_t > &payload);
+  void transmit_datagram(const uint8_t cmd,
+                         const std::vector< uint8_t > &payload);
 
 public:
   codec();
@@ -76,20 +91,24 @@ public:
    * @brief   Register a callback.
    *
    * @param[in] callback  The function to register.
-   * @note    Shall be of the form void(const std::vector<uint8_t> &).
-   *
-   * @return  Return the ID of the callback, is used for unregistration.
+   * @note    Shall be of the form void(kfly_comm::datagrams::xxx).
    */
-  //unsigned int registerCallback(kfly_callback callback);
+  template <typename Datagram>
+  void register_callback(void (*callback)(Datagram))
+  {
+    _callbacks.register_callback(callback);
+  }
 
   /**
    * @brief   Unregister a callback from the queue.
    *
-   * @param[in] id    The ID supplied from @p registerCallback.
-   *
-   * @return  Return true if the ID was deleted.
+   * @param[in] callback  The function to release.
    */
-  //bool unregisterCallback(const unsigned int id);
+  template <typename Datagram>
+  void release_callback(void (*callback)(Datagram))
+  {
+    _callbacks.release_callback(callback);
+  }
 
   /**
    * @brief   Input function for a KFly message, goes to the SLIP parser.
@@ -129,4 +148,5 @@ public:
 };
 
 }  // namespace KFlyTelemetry
+
 

@@ -11,17 +11,7 @@ namespace kfly_comm
  * Private members
  ********************************/
 
-// void codec::executeCallbacks(
-//     std::shared_ptr< KFlyTelemetryPayload::BasePayloadStruct > payload)
-// {
-//   /* Execute callbacks. */
-//   std::lock_guard< std::mutex > locker(_id_cblock);
-//
-//   for (auto &cb : callbacks)
-//     cb.second(payload);
-// }
-
-void codec::parseKFlyPacket(const std::vector< uint8_t > &payload)
+void codec::parse_packet(const std::vector< uint8_t > &payload)
 {
   /* Extract command. */
   const uint8_t cmd = payload[0];
@@ -62,108 +52,124 @@ void codec::parseKFlyPacket(const std::vector< uint8_t > &payload)
   else
   {
     /* Send payload to further processing. */
-    //auto s = payloadToStruct(cmd, data);
-    //executeCallbacks(s);
+    try
+    {
+      transmit_datagram(cmd, data);
+    }
+    catch (const std::invalid_argument &e)
+    {
+      /* Whenever a wrong sized payload is parsed, this will run. */
+    }
   }
 }
 
-// std::shared_ptr< BasePayloadStruct > codec::payloadToStruct(
-//     const uint8_t cmd, const std::vector< uint8_t > &payload)
-// {
-//   /* Extract the command. */
-//   const KFly_Command command = static_cast< KFly_Command >(cmd);
-//
-//   /* Create the return. */
-//   std::shared_ptr< BasePayloadStruct > ret;
-//
-//   /* Do appropriate operation for each command. */
-//   switch (command)
-//   {
-//     case KFly_Command::ACK:
-//
-//       ret = std::make_shared< BasePayloadStruct >();
-//       break;
-//
-//     case KFly_Command::GetRunningMode:
-//
-//       ret = std::make_shared< GetRunningModeStruct >(payload);
-//       break;
-//
-//     case KFly_Command::GetSystemInformation:
-//
-//       ret = std::make_shared< GetSystemInformationStruct >(payload);
-//       break;
-//
-//     case KFly_Command::GetControllerLimits:
-//
-//       ret = std::make_shared< ControllerLimitsStruct >(payload);
-//       break;
-//
-//     case KFly_Command::GetArmSettings:
-//
-//       ret = std::make_shared< ArmSettingsStruct >(payload);
-//       break;
-//
-//     case KFly_Command::GetRateControllerData:
-//
-//       ret = std::make_shared< ControllerDataStruct >(payload);
-//       break;
-//
-//     case KFly_Command::GetAttitudeControllerData:
-//
-//       ret = std::make_shared< ControllerDataStruct >(payload);
-//       break;
-//
-//     case KFly_Command::GetChannelMix:
-//
-//       ret = std::make_shared< ChannelMixStruct >(payload);
-//       break;
-//
-//     case KFly_Command::GetRCInputSettings:
-//
-//       ret = std::make_shared< RCInputSettingsStruct >(payload);
-//       break;
-//
-//     case KFly_Command::GetRCOutputSettings:
-//
-//       ret = std::make_shared< RCOutputSettingsStruct >(payload);
-//       break;
-//
-//     case KFly_Command::GetRCValues:
-//
-//       ret = std::make_shared< GetRCValuesStruct >(payload);
-//       break;
-//
-//     case KFly_Command::GetIMUData:
-//
-//       ret = std::make_shared< GetIMUDataStruct >(payload);
-//       break;
-//
-//     case KFly_Command::GetRawIMUData:
-//
-//       ret = std::make_shared< GetRawIMUDataStruct >(payload);
-//       break;
-//
-//     case KFly_Command::GetIMUCalibration:
-//
-//       ret = std::make_shared< IMUCalibrationStruct >(payload);
-//       break;
-//
-//     case KFly_Command::GetEstimationAttitude:
-//
-//       ret = std::make_shared< GetEstimationAttitudeStruct >(payload);
-//       break;
-//
-//     default:
-//
-//       ret = std::make_shared< BasePayloadStruct >();
-//   }
-//
-//   /* Set the command and return. */
-//   ret->id = command;
-//
-//   return ret;
-// }
+void codec::transmit_datagram(const uint8_t cmd,
+                              const std::vector< uint8_t > &payload)
+{
+  /* Extract the command. */
+  const commands command = static_cast< commands >(cmd);
+
+  /* Do appropriate operation for each command. */
+  switch (command)
+  {
+    case commands::ACK:
+
+      _callbacks.execute_callback(serializable_datagram< datagrams::Ack >());
+      break;
+
+    case commands::Ping:
+
+      _callbacks.execute_callback(serializable_datagram< datagrams::Ping >());
+      break;
+
+    case commands::GetRunningMode:
+
+      _callbacks.execute_callback(
+          serializable_datagram< datagrams::GetRunningMode >(payload));
+      break;
+
+    case commands::GetSystemInformation:
+
+      _callbacks.execute_callback(
+          serializable_datagram< datagrams::GetSystemInformation >(payload));
+      break;
+
+    case commands::GetControllerLimits:
+
+      _callbacks.execute_callback(
+          serializable_datagram< datagrams::ControllerLimits >(payload));
+      break;
+
+    case commands::GetArmSettings:
+
+      _callbacks.execute_callback(
+          serializable_datagram< datagrams::ArmSettings >(payload));
+      break;
+
+    case commands::GetRateControllerData:
+
+      _callbacks.execute_callback(
+          serializable_datagram< datagrams::ControllerData >(payload));
+      break;
+
+    case commands::GetAttitudeControllerData:
+
+      _callbacks.execute_callback(
+          serializable_datagram< datagrams::ControllerData >(payload));
+      break;
+
+    case commands::GetChannelMix:
+
+      _callbacks.execute_callback(
+          serializable_datagram< datagrams::ChannelMix >(payload));
+      break;
+
+    case commands::GetRCInputSettings:
+
+      _callbacks.execute_callback(
+          serializable_datagram< datagrams::RCInputSettings >(payload));
+      break;
+
+    case commands::GetRCOutputSettings:
+
+      _callbacks.execute_callback(
+          serializable_datagram< datagrams::RCOutputSettings >(payload));
+      break;
+
+    case commands::GetRCValues:
+
+      _callbacks.execute_callback(
+          serializable_datagram< datagrams::GetRCValues >(payload));
+      break;
+
+    case commands::GetIMUData:
+
+      _callbacks.execute_callback(
+          serializable_datagram< datagrams::GetIMUData >(payload));
+      break;
+
+    case commands::GetRawIMUData:
+
+      _callbacks.execute_callback(
+          serializable_datagram< datagrams::GetRawIMUData >(payload));
+      break;
+
+    case commands::GetIMUCalibration:
+
+      _callbacks.execute_callback(
+          serializable_datagram< datagrams::IMUCalibration >(payload));
+      break;
+
+    case commands::GetEstimationAttitude:
+
+      _callbacks.execute_callback(
+          serializable_datagram< datagrams::GetEstimationAttitude >(payload));
+      break;
+
+    default:
+      break;
+  }
+}
 
 /*********************************
  * Public members
@@ -173,7 +179,7 @@ codec::codec() : _parser()
 {
   /* Register the KFly packet parser to the parser output. */
   _parser.registerCallback([&](const std::vector< uint8_t > &payload) {
-    this->parseKFlyPacket(payload);
+    this->parse_packet(payload);
   });
 }
 
@@ -181,27 +187,6 @@ codec::~codec()
 {
 }
 
-//unsigned int codec::registerCallback(kfly_callback callback)
-//{
-//  std::lock_guard< std::mutex > locker(_id_cblock);
-//
-//  /* Add the callback to the list. */
-//  callbacks.emplace(_id, callback);
-//
-//  return _id++;
-//}
-//
-//bool codec::unregisterCallback(const unsigned int id)
-//{
-//  std::lock_guard< std::mutex > locker(_id_cblock);
-//
-//  /* Delete the callback with correct ID. */
-//  if (callbacks.erase(id) > 0)
-//    return true;
-//  else
-//    /* No match, return false. */
-//    return false;
-//}
 
 void codec::parse(const uint8_t data)
 {
@@ -217,7 +202,24 @@ void codec::parse(const std::vector< uint8_t > &payload)
   _parser.parse(payload);
 }
 
-//std::vector< uint8_t > codec::generatePacket(BasePayloadStruct &payload,
+
+template <typename Datagram>
+std::vector< uint8_t > generate_packet(const Datagram& datagram)
+{
+}
+
+template <>
+std::vector< uint8_t > generate_packet<datagrams::Ack>(const datagrams::Ack&)
+{
+}
+
+template <>
+std::vector< uint8_t > generate_packet<datagrams::Ping>(const datagrams::Ping&)
+{
+}
+
+
+// std::vector< uint8_t > codec::generatePacket(BasePayloadStruct &payload,
 //                                             bool ack)
 //{
 //  std::vector< uint8_t > packet, parser_packet;
@@ -247,7 +249,7 @@ void codec::parse(const std::vector< uint8_t > &payload)
 //  return parser_packet;
 //}
 //
-//std::vector< uint8_t > codec::generatePacket(
+// std::vector< uint8_t > codec::generatePacket(
 //    const std::shared_ptr< BasePayloadStruct > &payload, bool ack)
 //{
 //  std::vector< uint8_t > packet, parser_packet;

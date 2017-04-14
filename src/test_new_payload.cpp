@@ -4,8 +4,8 @@
 //          http://www.boost.org/LICENSE_1_0.txt)
 
 #include <iostream>
-#include "kfly_comm/datagram_director.hpp"
-#include "kfly_comm/serializable_datagram.hpp"
+#include "../include/kfly_comm/datagram_director.hpp"
+#include "../include/kfly_comm/serializable_datagram.hpp"
 
 
 //
@@ -24,6 +24,10 @@ struct data2
   char a, b;
   unsigned int i;
   bool bl;
+};
+
+struct data3
+{
 };
 
 #pragma pack(pop)
@@ -50,6 +54,12 @@ void callback_d2(data2)
   cout << "Data2\n";
 }
 
+void callback_d3(data3)
+{
+  using namespace std;
+  cout << "Data3\n";
+}
+
 //
 // -----------------------------------------------------------------------
 //
@@ -60,11 +70,13 @@ int main()
 
   using d1 = serializable_datagram< data1 >;
   using d2 = serializable_datagram< data2 >;
+  using d3 = serializable_datagram< data3 >;
 
   datagram_director< data1, data2 > cb;
 
   d1 test1(data1{1, 2});
   d2 test2(data2{'a', 'b', 1, true});
+  d3 testd3(data3{});
 
   auto ser1 = test1.serialize();
   auto ser2 = test2.serialize();
@@ -82,6 +94,7 @@ int main()
   cb.register_callback(callback_d1);
   cb.register_callback(callback_d11);
   cb.register_callback(callback_d2);
+  cb.register_callback(callback_d3); // This should fail
 
   cb.execute_callback(datagram1);
   cb.execute_callback(datagram2);
@@ -93,6 +106,7 @@ int main()
 
   cout << "Test size d1: " << test3.size() << "\n";
   cout << "Test size d2: " << d2::size() << "\n";
+  cout << "Test size d3: " << d3::size() << "\n";
 
   return 0;
 }

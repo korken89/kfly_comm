@@ -24,6 +24,16 @@ namespace datagrams
 
 #pragma pack(push, 1)
 
+/* @brief Ack. */
+struct Ack
+{
+};
+
+/* @brief Ping. */
+struct Ping
+{
+};
+
 /* @brief Running mode (bootloader or firmware). */
 struct GetRunningMode
 {
