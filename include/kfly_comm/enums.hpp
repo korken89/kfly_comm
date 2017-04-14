@@ -8,7 +8,9 @@
 
 #include <cstdint>
 
-namespace KFlyTelemetryPayload
+namespace kfly_comm
+{
+namespace enums
 {
 
 /* @brief The available flight modes via computer control. */
@@ -181,6 +183,7 @@ enum class Arming_Stick_Direction : uint8_t
     NON_LATCHING_SWITCH
 };
 
-} // namespace KFlyTelemetryPayload
+} // namespace enums
+} // namespace kfly_comm
 
 #endif

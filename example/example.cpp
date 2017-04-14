@@ -19,43 +19,43 @@
 ****************************************************************************/
 
 #include <iostream>
-#include "KFlyTelemetry/kfly_telemetry.h"
+#include "kfly_comm/kfly_comm.h"
 
 using namespace std;
 
-void test(KFlyTelemetry::kfly_message data);
+//void test(KFlyTelemetry::kfly_message data);
 
 int main()
 {
   /* Create a KFly Telemetry object. */
-  KFlyTelemetry::codec kft;
+  kfly_comm::codec kft;
 
-  /* Register a callback. */
-  kft.registerCallback(test);
+  // /* Register a callback. */
+  // kft.registerCallback(test);
 
-  /* Generate a test message (PING). */
-  std::vector< uint8_t > testPayload({0xc0, 0x2, 0, 0x6d, 0x7b, 0xc0});
+  // /* Generate a test message (PING). */
+  // std::vector< uint8_t > testPayload({0xc0, 0x2, 0, 0x6d, 0x7b, 0xc0});
 
-  /* Test the parser. */
-  kft.parse(testPayload);
+  // /* Test the parser. */
+  // kft.parse(testPayload);
 
-  /* Create a message for generation. */
-  auto ptr = std::make_shared< KFlyTelemetryPayload::SetDeviceStringsStruct >(
-      "type string", "id string");
+  // /* Create a message for generation. */
+  // auto ptr = std::make_shared< KFlyTelemetryPayload::SetDeviceStringsStruct >(
+  //     "type string", "id string");
 
-  /* Generate the payload. */
-  const std::vector< uint8_t > payload = kft.generatePacket(ptr, false);
+  // /* Generate the payload. */
+  // const std::vector< uint8_t > payload = kft.generatePacket(ptr, false);
 
-  for (uint8_t b : payload)
-    cout << static_cast< char >(b);
+  // for (uint8_t b : payload)
+  //   cout << static_cast< char >(b);
 
   return 0;
 }
 
 /* Print incoming data... */
-void test(KFlyTelemetry::kfly_message data)
-{
-  (void)data;
-
-  /* Do something with incoming messages. */
-}
+// void test(KFlyTelemetry::kfly_message data)
+// {
+//   (void)data;
+//
+//   /* Do something with incoming messages. */
+// }

@@ -7,10 +7,11 @@
 
 #include <cstdint>
 
-namespace KFlyTelemetry
+namespace kfly_comm
 {
+
 /* Command are from the view of KFly. */
-enum class KFly_Command : uint8_t
+enum class commands : uint8_t
 {
   /**
    * @brief   The zero command is not allowed.

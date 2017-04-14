@@ -11,10 +11,12 @@
 #include <cstring>
 #include <vector>
 #include <stdexcept>
-#include "KFlyTelemetry/kfly_commands.h"
-#include "KFlyTelemetry/kfly_enums.h"
+#include "kfly_comm/commands.hpp"
+#include "kfly_comm/enums.hpp"
 
-namespace KFlyTelemetryPayload
+namespace kfly_comm
+{
+namespace datagrams
 {
 /*****************************************************************************/
 /* NOTE!!! All structures bellow must be inside the #pragmas !!!             */
@@ -22,108 +24,31 @@ namespace KFlyTelemetryPayload
 
 #pragma pack(push, 1)
 
-/* @brief Base structure that allows generic usage of functions. */
-struct BasePayloadStruct
-{
-  /* @brief ID for the casting later. */
-  KFlyTelemetry::KFly_Command id;
-
-  BasePayloadStruct()
-  {
-  }
-
-  /**
-   * @brief  Default payload generation.
-   *
-   * @return The vector containing the empty byte string.
-   */
-  virtual const std::vector< uint8_t > toPayload()
-  {
-    std::vector< uint8_t > v;
-    return v;
-  }
-};
-
-template < class T >
-inline std::vector< uint8_t > serialize(const T *data)
-{
-  constexpr size_t bsize = sizeof(BasePayloadStruct);
-
-  auto ptr    = reinterpret_cast< const uint8_t * >(data) + bsize;
-  auto buffer = std::vector< uint8_t >{ptr, ptr + sizeof(T) - bsize};
-
-  return buffer;
-}
-
-template < class T >
-inline void deserialize(T *data, const std::vector< uint8_t > &datagram)
-{
-  constexpr size_t bsize = sizeof(BasePayloadStruct);
-
-  if (sizeof(T) == datagram.size() + bsize)
-    std::memcpy(reinterpret_cast< uint8_t * >(data) + bsize, datagram.data(),
-                sizeof(T) - bsize);
-  else
-  {
-    std::string s = "Payload error: expected " +
-                    std::to_string(sizeof(T) - bsize) + ", got " +
-                    std::to_string(datagram.size());
-
-    throw std::invalid_argument(s);
-  }
-}
-
 /* @brief Running mode (bootloader or firmware). */
-struct GetRunningModeStruct : BasePayloadStruct
+struct GetRunningMode
 {
   /* @brief 'B' for bootloader, 'P' for program. */
   char sel;
-
-  /**
-   * @brief Converts a payload vector to a proper struct.
-   *
-   * @param[in] payload   The payload from the KFly including header.
-   */
-  GetRunningModeStruct(const std::vector< uint8_t > &payload)
-  {
-    deserialize< GetRunningModeStruct >(this, payload);
-  }
 };
 
 /* @brief Manage the subscriptions to messages. */
-struct ManageSubscriptionStruct : BasePayloadStruct
+struct ManageSubscription
 {
   /* @brief Port that the messages will be published on. */
-  Ports port;
+  enums::Ports port;
 
   /* @brief Command to subscribe to. */
-  KFlyTelemetry::KFly_Command cmd;
+  commands cmd;
 
   /* @brief Selector for subscribe or unsubscribe. */
   bool subscribe;
 
   /* @brief Milliseconds between publishes, currently no event option. */
   uint32_t delta_ms;
-
-  ManageSubscriptionStruct(Ports port, KFlyTelemetry::KFly_Command cmd,
-                           bool subscribe, uint32_t delta_ms)
-      : port(port), cmd(cmd), subscribe(subscribe), delta_ms(delta_ms)
-  {
-    id = KFlyTelemetry::KFly_Command::ManageSubscriptions;
-  }
-
-  /**
-   * @brief Serializes the struct.
-   * @return  The serialized struct.
-   */
-  const std::vector< uint8_t > toPayload() override
-  {
-    return serialize< ManageSubscriptionStruct >(this);
-  }
 };
 
 /* @brief Version strings and unique identifiers. */
-struct GetSystemInformationStruct : BasePayloadStruct
+struct GetSystemInformation
 {
   /*========================*/
   /* Identification         */
@@ -191,44 +116,24 @@ struct GetSystemInformationStruct : BasePayloadStruct
    * @brief   Flag for if the serial computer control is enabled.
    */
   bool serial_interface_enabled;
-
-  /**
-   * @brief Converts a payload vector to a proper struct.
-   *
-   * @param[in] payload   The payload from the KFly including header.
-   */
-  GetSystemInformationStruct(const std::vector< uint8_t > &payload)
-  {
-    deserialize< GetSystemInformationStruct >(this, payload);
-  }
 };
 
 /* @brief Set the user ID strings. */
-struct SetDeviceStringsStruct : BasePayloadStruct
+struct SetDeviceStrings
 {
   /* @brief Value of the user ID string. */
   char _vehicle_name[48];
   char _vehicle_type[48];
 
-  SetDeviceStringsStruct(std::string vehicle_name, std::string vehicle_type)
+  SetDeviceStrings(std::string vehicle_name, std::string vehicle_type)
   {
-    id = KFlyTelemetry::KFly_Command::SetDeviceStrings;
     std::strncpy(_vehicle_name, vehicle_name.c_str(), 48);
     std::strncpy(_vehicle_type, vehicle_type.c_str(), 48);
-  }
-
-  /**
-   * @brief Serializes the struct.
-   * @return  The serialized struct.
-   */
-  const std::vector< uint8_t > toPayload() override
-  {
-    return serialize< SetDeviceStringsStruct >(this);
   }
 };
 
 /* @brief All limits in the control system. */
-struct ControllerLimitsStruct : BasePayloadStruct
+struct ControllerLimits
 {
   /* @brief Limits in radians/s, when in rate mode. */
   struct
@@ -253,34 +158,10 @@ struct ControllerLimitsStruct : BasePayloadStruct
   {
     float horizontal, vertical;
   } max_velocity;
-
-  ControllerLimitsStruct()
-  {
-    id = KFlyTelemetry::KFly_Command::SetControllerLimits;
-  }
-
-  /**
-   * @brief Converts a payload vector to a proper struct.
-   *
-   * @param[in] payload   The payload from the KFly excluding header.
-   */
-  ControllerLimitsStruct(const std::vector< uint8_t > &payload)
-  {
-    deserialize< ControllerLimitsStruct >(this, payload);
-  }
-
-  /**
-   * @brief Serializes the struct.
-   * @return  The serialized struct.
-   */
-  const std::vector< uint8_t > toPayload() override
-  {
-    return serialize< ControllerLimitsStruct >(this);
-  }
 };
 
 /* @brief Arming settings. */
-struct ArmSettingsStruct : BasePayloadStruct
+struct ArmSettings
 {
   /* @brief   Stick threshold for the arm/disarm logic to react. */
   float stick_threshold;
@@ -289,7 +170,7 @@ struct ArmSettingsStruct : BasePayloadStruct
   float armed_min_throttle;
 
   /* @brief   Stick direction to arm the controllers. */
-  Arming_Stick_Direction stick_direction;
+  enums::Arming_Stick_Direction stick_direction;
 
   /* @brief   Time (in seconds) needed to hold the sticks in correct
    *          position in order to arm the system. */
@@ -298,34 +179,10 @@ struct ArmSettingsStruct : BasePayloadStruct
   /* @brief   Time (in seconds) needed to disarm the controllers if no
    *          throttle has been given. */
   uint8_t arm_zero_throttle_timeout;
-
-  ArmSettingsStruct()
-  {
-    id = KFlyTelemetry::KFly_Command::SetArmSettings;
-  }
-
-  /**
-   * @brief Converts a payload vector to a proper struct.
-   *
-   * @param[in] payload   The payload from the KFly including header.
-   */
-  ArmSettingsStruct(const std::vector< uint8_t > &payload)
-  {
-    deserialize< ArmSettingsStruct >(this, payload);
-  }
-
-  /**
-   * @brief Serializes the struct.
-   * @return  The serialized struct.
-   */
-  const std::vector< uint8_t > toPayload() override
-  {
-    return serialize< ArmSettingsStruct >(this);
-  }
 };
 
 /* @brief Generic controller data structure. */
-struct ControllerDataStruct : BasePayloadStruct
+struct ControllerData
 {
   /* @brief Roll controller limits and gains. */
   struct
@@ -344,85 +201,31 @@ struct ControllerDataStruct : BasePayloadStruct
   {
     float P_gain, I_gain;
   } yaw_controller;
-
-  ControllerDataStruct(KFlyTelemetry::KFly_Command cmd)
-  {
-    if ((cmd == KFlyTelemetry::KFly_Command::SetRateControllerData) ||
-        (cmd == KFlyTelemetry::KFly_Command::SetAttitudeControllerData))
-    {
-      id = cmd;
-    }
-    else
-      throw std::invalid_argument("Not a valid command");
-  }
-
-  /**
-   * @brief Converts a payload vector to a proper struct.
-   *
-   * @param[in] payload   The payload from the KFly including header.
-   */
-  ControllerDataStruct(const std::vector< uint8_t > &payload)
-  {
-    deserialize< ControllerDataStruct >(this, payload);
-  }
-
-  /**
-   * @brief Serializes the struct.
-   * @return  The serialized struct.
-   */
-  const std::vector< uint8_t > toPayload() override
-  {
-    return serialize< ControllerDataStruct >(this);
-  }
 };
 
 /* @brief Affine channel mixing matrix. */
-struct ChannelMixStruct : BasePayloadStruct
+struct ChannelMix
 {
   /* @brief Weights to the throttle, pitch, roll, yaw. */
   float weights[8][4];
 
   /* @brief Offset of the outputs, used for servos. */
   float offset[8];
-
-  ChannelMixStruct()
-  {
-    id = KFlyTelemetry::KFly_Command::SetChannelMix;
-  }
-
-  /**
-   * @brief Converts a payload vector to a proper struct.
-   *
-   * @param[in] payload   The payload from the KFly including header.
-   */
-  ChannelMixStruct(const std::vector< uint8_t > &payload)
-  {
-    deserialize< ChannelMixStruct >(this, payload);
-  }
-
-  /**
-   * @brief Serializes the struct.
-   * @return  The serialized struct.
-   */
-  const std::vector< uint8_t > toPayload() override
-  {
-    return serialize< ChannelMixStruct >(this);
-  }
 };
 
 /* @brief Settings structure for the RC inputs. */
-struct RCInputSettingsStruct : BasePayloadStruct
+struct RCInputSettings
 {
   /* @brief If the receiver is in CPPM or PWM mode. */
-  RCInput_Mode mode;
+  enums::RCInput_Mode mode;
 
   uint16_t use_rssi;
 
   /* @brief Each channels' input role. */
-  RCInput_Role role[12];
+  enums::RCInput_Role role[12];
 
   /* @brief Each channels' input type. */
-  RCInput_Type type[12];
+  enums::RCInput_Type type[12];
 
   /* @brief Flag to reverse a channel. */
   bool ch_reverse[12];
@@ -435,71 +238,23 @@ struct RCInputSettingsStruct : BasePayloadStruct
 
   /* @brief The bottom value of the RC input (generally around 1000). */
   uint16_t ch_bottom[12];
-
-  RCInputSettingsStruct()
-  {
-    id = KFlyTelemetry::KFly_Command::SetRCInputSettings;
-  }
-
-  /**
-   * @brief Converts a payload vector to a proper struct.
-   *
-   * @param[in] payload   The payload from the KFly including header.
-   */
-  RCInputSettingsStruct(const std::vector< uint8_t > &payload)
-  {
-    deserialize< RCInputSettingsStruct >(this, payload);
-  }
-
-  /**
-   * @brief Serializes the struct.
-   * @return  The serialized struct.
-   */
-  const std::vector< uint8_t > toPayload() override
-  {
-    return serialize< RCInputSettingsStruct >(this);
-  }
 };
 
 /* @brief Settings structure for the RC inputs. */
-struct RCOutputSettingsStruct : BasePayloadStruct
+struct RCOutputSettings
 {
   /* @brief Mode of the outputs of bank 1. */
-  RCOutput_Mode mode_bank1;
+  enums::RCOutput_Mode mode_bank1;
 
   /* @brief Mode of the outputs of bank 2. */
-  RCOutput_Mode mode_bank2;
+  enums::RCOutput_Mode mode_bank2;
 
   /* @brief Enable flag for each output. */
   bool channel_enabled[8];
-
-  RCOutputSettingsStruct()
-  {
-    id = KFlyTelemetry::KFly_Command::SetRCOutputSettings;
-  }
-
-  /**
-   * @brief Converts a payload vector to a proper struct.
-   *
-   * @param[in] payload   The payload from the KFly including header.
-   */
-  RCOutputSettingsStruct(const std::vector< uint8_t > &payload)
-  {
-    deserialize< RCOutputSettingsStruct >(this, payload);
-  }
-
-  /**
-   * @brief Serializes the struct.
-   * @return  The serialized struct.
-   */
-  const std::vector< uint8_t > toPayload() override
-  {
-    return serialize< RCOutputSettingsStruct >(this);
-  }
 };
 
 /* @brief Get the values and status of the RC input. */
-struct GetRCValuesStruct : BasePayloadStruct
+struct GetRCValues
 {
   /* @brief Active connection indicator. */
   uint32_t active_connection;
@@ -520,16 +275,11 @@ struct GetRCValuesStruct : BasePayloadStruct
   float calibrated_value[12];
 
   /* @brief Input switch states. */
-  RCInput_Switch_Position switches[3];
-
-  GetRCValuesStruct(const std::vector< uint8_t > &payload)
-  {
-    deserialize< GetRCValuesStruct >(this, payload);
-  }
+  enums::RCInput_Switch_Position switches[3];
 };
 
 /* @brief Calibrated sensor data structure. */
-struct GetIMUDataStruct : BasePayloadStruct
+struct GetIMUData
 {
   /* @brief Accelerometer data in x, y and z in G. */
   float accelerometer[3];
@@ -543,14 +293,15 @@ struct GetIMUDataStruct : BasePayloadStruct
   /* @brief The temperature of the IMU in deg/C. */
   float temperature;
 
-  GetIMUDataStruct(const std::vector< uint8_t > &payload)
-  {
-    deserialize< GetIMUDataStruct >(this, payload);
-  }
+  /* @brief Pressure in Pascals. */
+  float pressure;
+
+  /* @brief Time stamp (internal clock) in nanoseconds. */
+  int64_t time_stamp_ns;
 };
 
 /* @brief Raw sensor data, used for calibration or logging. */
-struct GetRawIMUDataStruct : BasePayloadStruct
+struct GetRawIMUData
 {
   /* @brief Accelerometer data in x, y and z in the internal format. */
   int16_t accelerometer[3];
@@ -569,16 +320,11 @@ struct GetRawIMUDataStruct : BasePayloadStruct
 
   /* @brief Time stamp (internal clock) in nanoseconds. */
   int64_t time_stamp_ns;
-
-  GetRawIMUDataStruct(const std::vector< uint8_t > &payload)
-  {
-    deserialize< GetRawIMUDataStruct >(this, payload);
-  }
 };
 
 /* @brief IMU calibration structure that takes the internal format and
  *        converts it into the true values. */
-struct IMUCalibrationStruct : BasePayloadStruct
+struct IMUCalibration
 {
   /* @brief Accelerometer bias in x, y and z. */
   float accelerometer_bias[3];
@@ -595,35 +341,15 @@ struct IMUCalibrationStruct : BasePayloadStruct
   /* @brief UNIX timestamp in seconds from 1970. */
   uint32_t timestamp;
 
-  IMUCalibrationStruct()
+  IMUCalibration()
   {
-    id        = KFlyTelemetry::KFly_Command::SetIMUCalibration;
     timestamp = static_cast< uint32_t >(std::time(0));
-  }
-
-  /**
-   * @brief Converts a payload vector to a proper struct.
-   *
-   * @param[in] payload   The payload from the KFly including header.
-   */
-  IMUCalibrationStruct(const std::vector< uint8_t > &payload)
-  {
-    deserialize< IMUCalibrationStruct >(this, payload);
-  }
-
-  /**
-   * @brief Serializes the struct.
-   * @return  The serialized struct.
-   */
-  const std::vector< uint8_t > toPayload() override
-  {
-    return serialize< IMUCalibrationStruct >(this);
   }
 };
 
 /* @brief Estimation Attitude structure, holds the attitude estimation states.
  */
-struct GetEstimationAttitudeStruct : BasePayloadStruct
+struct GetEstimationAttitude
 {
   /* @brief Quaternion containing attitude. */
   float qw, qx, qy, qz;
@@ -633,32 +359,17 @@ struct GetEstimationAttitudeStruct : BasePayloadStruct
 
   /* @brief Angular rate biases in [rad/s]. */
   float rate_bias[3];
-
-  GetEstimationAttitudeStruct()
-  {
-    id = KFlyTelemetry::KFly_Command::GetEstimationAttitude;
-  }
-
-  /**
-   * @brief Converts a payload vector to a proper struct.
-   *
-   * @param[in] payload   The payload from the KFly including header.
-   */
-  GetEstimationAttitudeStruct(const std::vector< uint8_t > &payload)
-  {
-    deserialize< GetEstimationAttitudeStruct >(this, payload);
-  }
 };
 
-struct GetEstimationAllStatesStruct : BasePayloadStruct
+struct GetEstimationAllStates
 {
 };
 
 /* @brief Computer control data. */
-struct ComputerControlReferenceStruct : BasePayloadStruct
+struct ComputerControlReference
 {
   /* @brief Flight mode to differentiate the following data. */
-  FlightMode mode;
+  enums::FlightMode mode;
 
   union {
     /* @brief Direct motor control data. */
@@ -686,10 +397,8 @@ struct ComputerControlReferenceStruct : BasePayloadStruct
     } attitude;
   };
 
-  ComputerControlReferenceStruct()
+  ComputerControlReference()
   {
-    id = KFlyTelemetry::KFly_Command::ComputerControlReference;
-
     /* Zero all fields. */
     attitude.w        = 0;
     attitude.x        = 0;
@@ -697,20 +406,11 @@ struct ComputerControlReferenceStruct : BasePayloadStruct
     attitude.z        = 0;
     attitude.throttle = 0;
   }
-
-  /**
-   * @brief Serializes the struct.
-   * @return  The serialized struct.
-   */
-  const std::vector< uint8_t > toPayload() override
-  {
-    return serialize< ComputerControlReferenceStruct >(this);
-  }
 };
 
 /* @brief Motion capture frame to KFly data, used for the internal estimation.
  */
-struct MotionCaptureFrameStruct : BasePayloadStruct
+struct MotionCaptureFrame
 {
   /* @brief Frame number. */
   uint32_t framenumber;
@@ -720,20 +420,6 @@ struct MotionCaptureFrameStruct : BasePayloadStruct
 
   /* @brief Attitude in quaternions. */
   float qw, qx, qy, qz;
-
-  MotionCaptureFrameStruct()
-  {
-    id = KFlyTelemetry::KFly_Command::MotionCaptureMeasurement;
-  }
-
-  /**
-   * @brief Serializes the struct.
-   * @return  The serialized struct.
-   */
-  const std::vector< uint8_t > toPayload() override
-  {
-    return serialize< MotionCaptureFrameStruct >(this);
-  }
 };
 
 /*****************************************************************************/
@@ -742,4 +428,5 @@ struct MotionCaptureFrameStruct : BasePayloadStruct
 
 #pragma pack(pop)
 
-}  // namespace KFlyTelemetryPayload
+}  // namespace datagrams
+}  // namespace kfly_comm

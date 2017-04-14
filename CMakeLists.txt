@@ -12,7 +12,7 @@ project(kfly_comm)
 find_package(catkin QUIET)
 
 ########################################
-# Enable C++11 and other C++ flags
+# Enable C++14 and other C++ flags
 ########################################
 set(CMAKE_CXX_FLAGS "-std=c++14 ${CMAKE_CXX_FLAGS}")
 

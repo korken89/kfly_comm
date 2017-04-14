@@ -17,22 +17,16 @@
 /* Library includes */
 #include "cppSLIP/slip.h"
 //#include "cobs/cobs.h"
+#include "kfly_comm/datagram_director.hpp"
+#include "kfly_comm/serializable_datagram.hpp"
 
 /* KFly includes */
-#include "KFlyTelemetry/kfly_commands.h"
-#include "KFlyTelemetry/kfly_payloads.h"
-#include "KFlyTelemetry/crc.h"
+#include "kfly_comm/commands.hpp"
+#include "kfly_comm/datagrams.hpp"
+#include "kfly_comm/crc.hpp"
 
-namespace KFlyTelemetry
+namespace kfly_comm
 {
-using namespace KFlyTelemetryPayload;
-
-/** @brief Definition of the message in the callback. */
-using kfly_message = const std::shared_ptr< BasePayloadStruct >;
-
-/** @brief Definition of the message callback. */
-using kfly_callback = std::function< void(kfly_message) >;
-
 /** @brief Definition of the parser type. */
 using kfly_parser = SLIP::SLIP;
 
@@ -41,12 +35,6 @@ class codec
 private:
   /** @brief Mutex for the ID counter and the callback list. */
   std::mutex _id_cblock;
-
-  /** @brief Vector holding the registered callbacks. */
-  std::map< unsigned int, kfly_callback > callbacks;
-
-  /** @brief ID counter for the removal of subscriptions. */
-  unsigned int _id;
 
   /** @brief Parser for the system. */
   kfly_parser _parser;
@@ -59,7 +47,7 @@ private:
    *
    * @param[in] payload   The payload to be sent.
    */
-  void executeCallbacks(std::shared_ptr< BasePayloadStruct > payload);
+  //void executeCallbacks(std::shared_ptr< BasePayloadStruct > payload);
 
   /**
    * @brief   Parses a payload and, if correct, runs executeCallbacks.
@@ -76,8 +64,8 @@ private:
    *
    * @return A BasePayloadStruct that holds the parsed message.
    */
-  std::shared_ptr< BasePayloadStruct > payloadToStruct(
-      const uint8_t cmd, const std::vector< uint8_t > &payload);
+  //std::shared_ptr< BasePayloadStruct > payloadToStruct(
+  //    const uint8_t cmd, const std::vector< uint8_t > &payload);
 
 public:
   codec();
@@ -92,7 +80,7 @@ public:
    *
    * @return  Return the ID of the callback, is used for unregistration.
    */
-  unsigned int registerCallback(kfly_callback callback);
+  //unsigned int registerCallback(kfly_callback callback);
 
   /**
    * @brief   Unregister a callback from the queue.
@@ -101,7 +89,7 @@ public:
    *
    * @return  Return true if the ID was deleted.
    */
-  bool unregisterCallback(const unsigned int id);
+  //bool unregisterCallback(const unsigned int id);
 
   /**
    * @brief   Input function for a KFly message, goes to the SLIP parser.
@@ -125,8 +113,8 @@ public:
    *
    * @return A vector that holds the generated message.
    */
-  static std::vector< uint8_t > generatePacket(BasePayloadStruct &payload,
-                                               bool ack);
+  //static std::vector< uint8_t > generatePacket(BasePayloadStruct &payload,
+  //                                             bool ack);
 
   /**
    * @brief   Converts a BasePayloadStruct to a byte message for transmission.
@@ -136,8 +124,8 @@ public:
    *
    * @return A vector that holds the generated message.
    */
-  static std::vector< uint8_t > generatePacket(
-      const std::shared_ptr< BasePayloadStruct > &payload, bool ack);
+  //static std::vector< uint8_t > generatePacket(
+  //    const std::shared_ptr< BasePayloadStruct > &payload, bool ack);
 };
 
 }  // namespace KFlyTelemetry
