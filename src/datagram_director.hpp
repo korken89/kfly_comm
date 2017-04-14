@@ -7,8 +7,33 @@
 #include <mutex>
 
 /**
- * @brief   A class which registers and directs callbacks based on datagram
- *          types.
+ * @brief     A class which registers and directs callbacks based on datagram
+ *            types.
+ *
+ * @details   The datagram director is based on that each registered datagram
+ *            type gets its own callback vector (through a little meta
+ *            programming, which makes it all happen at compile time), so each
+ *            callback vector has its own mutex to only lock it and not the
+ *            other callbacks. So in conclusion the data structure looks like
+ *            this:
+ *
+ *            element = pair<
+ *                            vector of callbacks for specific datagram,
+ *                            access mutex to the vector
+ *                          >
+ *
+ *            callback_list = tuple<
+ *                                   element< Datagram 1 >,
+ *                                   element< Datagram 2 >,
+ *                                   ...,
+ *                                   element< Datagram N >
+ *                                 >
+ *
+ * @note      The class is thread safe, each callback vector is protected with
+ *            a mutex.
+ *
+ * @tparam Datagrams    Datagram types to be registered in the datagram
+ *                      director for callback handling.
  */
 template < typename... Datagrams >
 class datagram_director
@@ -51,12 +76,21 @@ public:
    * @tparam Datagram   Type of the datagram for this tuple element.
    */
   template < typename Datagram >
-  void register_callback(function_ptr< Datagram > fun)
+  void register_callback(function_ptr< Datagram > callback)
   {
-    std::lock_guard< std::mutex > lock(
-        std::get< make_element< Datagram > >(_callbacks).second);
+    /* Do a nullptr check. */
+    if (callback == nullptr)
+      return;
+    else
+    {
+      /* Get the corresponding datagram's mutex and lock it. */
+      std::lock_guard< std::mutex > lock(
+          std::get< make_element< Datagram > >(_callbacks).second);
 
-    std::get< make_element< Datagram > >(_callbacks).first.emplace_back(fun);
+      /* Emplace the callback in the corresponding callback vector. */
+      std::get< make_element< Datagram > >(_callbacks)
+          .first.emplace_back(callback);
+    }
   }
 
   /**
@@ -68,16 +102,18 @@ public:
    * @tparam Datagram   Type of the datagram for this tuple element.
    */
   template < typename Datagram >
-  void release_callback(function_ptr< Datagram > fun)
+  void release_callback(function_ptr< Datagram > callback)
   {
+    /* Get the corresponding datagram's mutex and lock it. */
     std::lock_guard< std::mutex > lock(
         std::get< make_element< Datagram > >(_callbacks).second);
 
+    /* Get the callback list, and delete the requested callback. */
     auto &callbacks = std::get< make_element< Datagram > >(_callbacks).first;
 
     callbacks.erase(std::remove_if(callbacks.begin(), callbacks.end(),
-                                   [&](function_ptr< Datagram > l_fun) {
-                                     return fun == l_fun;
+                                   [&](function_ptr< Datagram > l_cb) {
+                                     return callback == l_cb;
                                    }),
                     callbacks.end());
   }
@@ -92,10 +128,13 @@ public:
   template < typename Datagram >
   void execute_callback(const Datagram &data)
   {
+    /* Get the corresponding datagram's mutex and lock it. */
     std::lock_guard< std::mutex > lock(
         std::get< make_element< Datagram > >(_callbacks).second);
 
+    /* Call each callback. */
     for (auto callback : std::get< make_element< Datagram > >(_callbacks).first)
       callback(data);
   }
 };
+
