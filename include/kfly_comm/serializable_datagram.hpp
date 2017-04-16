@@ -96,7 +96,7 @@ struct serializable_datagram
    *
    * @return  Serialized datagram.
    */
-  constexpr auto serialize() const noexcept
+  auto serialize() const noexcept
   {
     serialized_array buffer;
     std::memcpy(buffer.data(), &datagram, sizeof(Datagram));
