@@ -125,15 +125,13 @@ public:
    * @return A vector that holds the generated message.
    */
   template < typename Datagram >
-  std::vector< uint8_t > generate_packet(const Datagram &datagram,
-                                         bool ack = false)
+  static std::vector< uint8_t > generate_packet(const Datagram &datagram,
+                                                bool ack = false)
   {
-    auto packet =
-        kfly_packet< Datagram, true >(
-            command_traits::get_packet_command< Datagram >::value, datagram,
-            ack);
+    auto packet = kfly_packet< Datagram, true >(
+        command_traits::get_packet_command< Datagram >::value, datagram, ack);
 
-    std::vector<uint8_t> out;
+    std::vector< uint8_t > out;
     kfly_parser::encode(packet.payload, out);
 
     return out;
@@ -148,7 +146,8 @@ public:
    *
    * @return A vector that holds the generated message.
    */
-  std::vector< uint8_t > generate_command(commands command, bool ack = false);
+  static std::vector< uint8_t > generate_command(commands command,
+                                                 bool ack = false);
 };
 
 }  // namespace KFlyTelemetry
