@@ -35,7 +35,7 @@ struct Ping
 };
 
 /* @brief Running mode (bootloader or firmware). */
-struct GetRunningMode
+struct RunningMode
 {
   /* @brief 'B' for bootloader, 'P' for program. */
   char sel;
@@ -58,7 +58,7 @@ struct ManageSubscription
 };
 
 /* @brief Version strings and unique identifiers. */
-struct GetSystemInformation
+struct SystemInformation
 {
   /*========================*/
   /* Identification         */
@@ -135,7 +135,7 @@ struct SetDeviceStrings
   char _vehicle_name[48];
   char _vehicle_type[48];
 
-  SetDeviceStrings(std::string vehicle_name, std::string vehicle_type)
+  void SetStrings(std::string vehicle_name, std::string vehicle_type)
   {
     std::strncpy(_vehicle_name, vehicle_name.c_str(), 48);
     std::strncpy(_vehicle_type, vehicle_type.c_str(), 48);
@@ -213,6 +213,12 @@ struct ControllerData
   } yaw_controller;
 };
 
+/* @brief Rate controller data. */
+struct RateControllerData : ControllerData {};
+
+/* @brief Attitude controller data. */
+struct AttitudeControllerData : ControllerData {};
+
 /* @brief Affine channel mixing matrix. */
 struct ChannelMix
 {
@@ -263,8 +269,8 @@ struct RCOutputSettings
   bool channel_enabled[8];
 };
 
-/* @brief Get the values and status of the RC input. */
-struct GetRCValues
+/* @brief The values and status of the RC input. */
+struct RCValues
 {
   /* @brief Active connection indicator. */
   uint32_t active_connection;
@@ -289,7 +295,7 @@ struct GetRCValues
 };
 
 /* @brief Calibrated sensor data structure. */
-struct GetIMUData
+struct IMUData
 {
   /* @brief Accelerometer data in x, y and z in G. */
   float accelerometer[3];
@@ -311,7 +317,7 @@ struct GetIMUData
 };
 
 /* @brief Raw sensor data, used for calibration or logging. */
-struct GetRawIMUData
+struct RawIMUData
 {
   /* @brief Accelerometer data in x, y and z in the internal format. */
   int16_t accelerometer[3];
@@ -350,16 +356,11 @@ struct IMUCalibration
 
   /* @brief UNIX timestamp in seconds from 1970. */
   uint32_t timestamp;
-
-  IMUCalibration()
-  {
-    timestamp = static_cast< uint32_t >(std::time(0));
-  }
 };
 
 /* @brief Estimation Attitude structure, holds the attitude estimation states.
  */
-struct GetEstimationAttitude
+struct EstimationAttitude
 {
   /* @brief Quaternion containing attitude. */
   float qw, qx, qy, qz;
@@ -369,10 +370,6 @@ struct GetEstimationAttitude
 
   /* @brief Angular rate biases in [rad/s]. */
   float rate_bias[3];
-};
-
-struct GetEstimationAllStates
-{
 };
 
 /* @brief Computer control data. */
@@ -406,16 +403,6 @@ struct ComputerControlReference
       float throttle;
     } attitude;
   };
-
-  ComputerControlReference()
-  {
-    /* Zero all fields. */
-    attitude.w        = 0;
-    attitude.x        = 0;
-    attitude.y        = 0;
-    attitude.z        = 0;
-    attitude.throttle = 0;
-  }
 };
 
 /* @brief Motion capture frame to KFly data, used for the internal estimation.

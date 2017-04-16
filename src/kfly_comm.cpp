@@ -74,96 +74,112 @@ void codec::transmit_datagram(const uint8_t cmd,
   {
     case commands::ACK:
 
-      _callbacks.execute_callback(serializable_datagram< datagrams::Ack >());
+      _callbacks.execute_callback(
+          serializable_datagram< datagrams::Ack >().get_datagram());
       break;
 
     case commands::Ping:
 
-      _callbacks.execute_callback(serializable_datagram< datagrams::Ping >());
+      _callbacks.execute_callback(
+          serializable_datagram< datagrams::Ping >().get_datagram());
       break;
 
     case commands::GetRunningMode:
 
       _callbacks.execute_callback(
-          serializable_datagram< datagrams::GetRunningMode >(payload));
+          serializable_datagram< datagrams::RunningMode >(payload)
+              .get_datagram());
       break;
 
     case commands::GetSystemInformation:
 
       _callbacks.execute_callback(
-          serializable_datagram< datagrams::GetSystemInformation >(payload));
+          serializable_datagram< datagrams::SystemInformation >(payload)
+              .get_datagram());
       break;
 
     case commands::GetControllerLimits:
 
       _callbacks.execute_callback(
-          serializable_datagram< datagrams::ControllerLimits >(payload));
+          serializable_datagram< datagrams::ControllerLimits >(payload)
+              .get_datagram());
       break;
 
     case commands::GetArmSettings:
 
       _callbacks.execute_callback(
-          serializable_datagram< datagrams::ArmSettings >(payload));
+          serializable_datagram< datagrams::ArmSettings >(payload)
+              .get_datagram());
       break;
 
     case commands::GetRateControllerData:
 
       _callbacks.execute_callback(
-          serializable_datagram< datagrams::ControllerData >(payload));
+          serializable_datagram< datagrams::RateControllerData >(payload)
+              .get_datagram());
       break;
 
     case commands::GetAttitudeControllerData:
 
       _callbacks.execute_callback(
-          serializable_datagram< datagrams::ControllerData >(payload));
+          serializable_datagram< datagrams::AttitudeControllerData >(payload)
+              .get_datagram());
       break;
 
     case commands::GetChannelMix:
 
       _callbacks.execute_callback(
-          serializable_datagram< datagrams::ChannelMix >(payload));
+          serializable_datagram< datagrams::ChannelMix >(payload)
+              .get_datagram());
       break;
 
     case commands::GetRCInputSettings:
 
       _callbacks.execute_callback(
-          serializable_datagram< datagrams::RCInputSettings >(payload));
+          serializable_datagram< datagrams::RCInputSettings >(payload)
+              .get_datagram());
       break;
 
     case commands::GetRCOutputSettings:
 
       _callbacks.execute_callback(
-          serializable_datagram< datagrams::RCOutputSettings >(payload));
+          serializable_datagram< datagrams::RCOutputSettings >(payload)
+              .get_datagram());
       break;
 
     case commands::GetRCValues:
 
       _callbacks.execute_callback(
-          serializable_datagram< datagrams::GetRCValues >(payload));
+          serializable_datagram< datagrams::RCValues >(payload)
+              .get_datagram());
       break;
 
     case commands::GetIMUData:
 
       _callbacks.execute_callback(
-          serializable_datagram< datagrams::GetIMUData >(payload));
+          serializable_datagram< datagrams::IMUData >(payload)
+              .get_datagram());
       break;
 
     case commands::GetRawIMUData:
 
       _callbacks.execute_callback(
-          serializable_datagram< datagrams::GetRawIMUData >(payload));
+          serializable_datagram< datagrams::RawIMUData >(payload)
+              .get_datagram());
       break;
 
     case commands::GetIMUCalibration:
 
       _callbacks.execute_callback(
-          serializable_datagram< datagrams::IMUCalibration >(payload));
+          serializable_datagram< datagrams::IMUCalibration >(payload)
+              .get_datagram());
       break;
 
     case commands::GetEstimationAttitude:
 
       _callbacks.execute_callback(
-          serializable_datagram< datagrams::GetEstimationAttitude >(payload));
+          serializable_datagram< datagrams::EstimationAttitude >(payload)
+              .get_datagram());
       break;
 
     default:
@@ -177,6 +193,8 @@ void codec::transmit_datagram(const uint8_t cmd,
 
 codec::codec() : _parser()
 {
+  std::lock_guard< std::mutex > locker(_parser_lock);
+
   /* Register the KFly packet parser to the parser output. */
   _parser.registerCallback([&](const std::vector< uint8_t > &payload) {
     this->parse_packet(payload);
@@ -186,7 +204,6 @@ codec::codec() : _parser()
 codec::~codec()
 {
 }
-
 
 void codec::parse(const uint8_t data)
 {
@@ -202,80 +219,16 @@ void codec::parse(const std::vector< uint8_t > &payload)
   _parser.parse(payload);
 }
 
-
-template <typename Datagram>
-std::vector< uint8_t > generate_packet(const Datagram& datagram)
+std::vector< uint8_t > codec::generate_command(commands command, bool ack)
 {
+  /* Take any random datagram. */
+  auto packet =
+      kfly_packet< datagrams::Ack, false >(command, datagrams::Ack{}, ack);
+
+  std::vector<uint8_t> out;
+  kfly_parser::encode(packet.payload, out);
+
+  return out;
 }
 
-template <>
-std::vector< uint8_t > generate_packet<datagrams::Ack>(const datagrams::Ack&)
-{
-}
-
-template <>
-std::vector< uint8_t > generate_packet<datagrams::Ping>(const datagrams::Ping&)
-{
-}
-
-
-// std::vector< uint8_t > codec::generatePacket(BasePayloadStruct &payload,
-//                                             bool ack)
-//{
-//  std::vector< uint8_t > packet, parser_packet;
-//  const std::vector< uint8_t > data_payload = payload.toPayload();
-//
-//  union {
-//    uint8_t b[2];
-//    uint16_t u16;
-//  } crc;
-//
-//  /* Construct the final packet: | CMD | SIZE | PAYLOAD | CRC | */
-//  if (ack)
-//    packet.emplace_back(static_cast< uint8_t >(payload.id) | 0x80);
-//  else
-//    packet.emplace_back(static_cast< uint8_t >(payload.id));
-//
-//  packet.emplace_back(static_cast< uint8_t >(data_payload.size()));
-//
-//  if (data_payload.size() > 0)
-//    packet.insert(packet.end(), data_payload.begin(), data_payload.end());
-//
-//  crc.u16 = CRC16_CCITT::generateCRC(packet);
-//  packet.insert(packet.end(), &crc.b[0], &crc.b[2]);
-//
-//  kfly_parser::encode(packet, parser_packet);
-//
-//  return parser_packet;
-//}
-//
-// std::vector< uint8_t > codec::generatePacket(
-//    const std::shared_ptr< BasePayloadStruct > &payload, bool ack)
-//{
-//  std::vector< uint8_t > packet, parser_packet;
-//  const std::vector< uint8_t > data_payload = payload->toPayload();
-//
-//  union {
-//    uint8_t b[2];
-//    uint16_t u16;
-//  } crc;
-//
-//  /* Construct the final packet: | CMD | SIZE | PAYLOAD | CRC | */
-//  if (ack)
-//    packet.emplace_back(static_cast< uint8_t >(payload->id) | 0x80);
-//  else
-//    packet.emplace_back(static_cast< uint8_t >(payload->id));
-//
-//  packet.emplace_back(static_cast< uint8_t >(data_payload.size()));
-//
-//  if (data_payload.size() > 0)
-//    packet.insert(packet.end(), data_payload.begin(), data_payload.end());
-//
-//  crc.u16 = CRC16_CCITT::generateCRC(packet);
-//  packet.insert(packet.end(), &crc.b[0], &crc.b[2]);
-//
-//  kfly_parser::encode(packet, parser_packet);
-//
-//  return parser_packet;
-//}
 }

@@ -92,4 +92,24 @@ constexpr uint16_t generateCRC(const std::array< uint8_t, N > &payload,
   return crc;
 }
 
+/**
+ * @brief   Calculates the CRC-CCITT of a payload.
+ *
+ * @param[in] data        The payload to be checked (single byte).
+ * @param[in] crc_start   The starting value of the CRC, can be use to chain
+ *                        multiple calculations.
+ *
+ * @return  The calculated CRC-CCITT.
+ */
+constexpr uint16_t generateCRC(const uint8_t data,
+                               const uint16_t crc_start = 0xffff)
+{
+  uint16_t crc = crc_start;
+
+    uint8_t tbl_idx = ((crc >> 8) ^ data) & 0xff;
+    crc             = crc16_table[tbl_idx] ^ (crc << 8);
+
+  return crc;
+}
+
 } /* END namespace CRC16_CCITT */

@@ -58,6 +58,16 @@ struct serializable_datagram
   }
 
   /**
+   * @brief   Constructor from a datagram object.
+   *
+   * @param[in] datagram  The datagram to serialize.
+   */
+  constexpr serializable_datagram(const Datagram &datagram) noexcept
+      : datagram{datagram}
+  {
+  }
+
+  /**
    * @brief   Constructor from a byte stream (std::array version).
    *
    * @param[in] data  The serialized data to create a datagram from.

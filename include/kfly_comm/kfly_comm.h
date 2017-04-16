@@ -24,6 +24,8 @@
 #include "kfly_comm/commands.hpp"
 #include "kfly_comm/datagrams.hpp"
 #include "kfly_comm/crc.hpp"
+#include "kfly_comm/packet.hpp"
+#include "kfly_comm/datagram_traits.hpp"
 
 namespace kfly_comm
 {
@@ -44,27 +46,16 @@ private:
 
   /** @brief Datagram director for the callbacks and registered datagrams. */
   datagram_director<
-                     datagrams::Ack,
-                     datagrams::Ping,
-                     datagrams::GetRunningMode,
-                     datagrams::ManageSubscription,
-                     datagrams::GetSystemInformation,
-                     datagrams::SetDeviceStrings,
-                     datagrams::ControllerLimits,
-                     datagrams::ArmSettings,
-                     datagrams::ControllerData,
-                     datagrams::ChannelMix,
-                     datagrams::RCInputSettings,
-                     datagrams::RCOutputSettings,
-                     datagrams::GetRCValues,
-                     datagrams::GetIMUData,
-                     datagrams::GetRawIMUData,
-                     datagrams::IMUCalibration,
-                     datagrams::GetEstimationAttitude,
-                     datagrams::GetEstimationAllStates,
-                     datagrams::ComputerControlReference,
-                     datagrams::MotionCaptureFrame
-                   > _callbacks;
+      datagrams::Ack, datagrams::Ping, datagrams::RunningMode,
+      datagrams::ManageSubscription, datagrams::SystemInformation,
+      datagrams::SetDeviceStrings, datagrams::ControllerLimits,
+      datagrams::ArmSettings, datagrams::RateControllerData,
+      datagrams::AttitudeControllerData, datagrams::ChannelMix,
+      datagrams::RCInputSettings, datagrams::RCOutputSettings,
+      datagrams::RCValues, datagrams::IMUData, datagrams::RawIMUData,
+      datagrams::IMUCalibration, datagrams::EstimationAttitude,
+      datagrams::ComputerControlReference, datagrams::MotionCaptureFrame >
+      _callbacks;
 
   /**
    * @brief   Parses a payload and, if correct, runs executeCallbacks.
@@ -91,9 +82,10 @@ public:
    * @brief   Register a callback.
    *
    * @param[in] callback  The function to register.
+   *
    * @note    Shall be of the form void(kfly_comm::datagrams::xxx).
    */
-  template <typename Datagram>
+  template < typename Datagram >
   void register_callback(void (*callback)(Datagram))
   {
     _callbacks.register_callback(callback);
@@ -104,7 +96,7 @@ public:
    *
    * @param[in] callback  The function to release.
    */
-  template <typename Datagram>
+  template < typename Datagram >
   void release_callback(void (*callback)(Datagram))
   {
     _callbacks.release_callback(callback);
@@ -125,28 +117,38 @@ public:
   void parse(const std::vector< uint8_t > &payload);
 
   /**
-   * @brief   Converts a BasePayloadStruct to a byte message for transmission.
+   * @brief   Converts a Datagram to a byte message for transmission.
    *
-   * @param[in] payload   The BasePayloadStruct payload to be converted.
+   * @param[in] datagram  The Datagram payload to be converted.
    * @param[in] ack       If true, then an ack is requested.
    *
    * @return A vector that holds the generated message.
    */
-  //static std::vector< uint8_t > generatePacket(BasePayloadStruct &payload,
-  //                                             bool ack);
+  template < typename Datagram >
+  std::vector< uint8_t > generate_packet(const Datagram &datagram,
+                                         bool ack = false)
+  {
+    auto packet =
+        kfly_packet< Datagram, true >(
+            command_traits::get_packet_command< Datagram >::value, datagram,
+            ack);
+
+    std::vector<uint8_t> out;
+    kfly_parser::encode(packet.payload, out);
+
+    return out;
+  }
 
   /**
-   * @brief   Converts a BasePayloadStruct to a byte message for transmission.
+   * @brief   Converts a command (no datagram)to a byte message for
+   *          transmission.
    *
-   * @param[in] payload   The BasePayloadStruct payload to be converted
-   *                      passed by shared pointer..
+   * @param[in] command   The command to send.
+   * @param[in] ack       If true, then an ack is requested.
    *
    * @return A vector that holds the generated message.
    */
-  //static std::vector< uint8_t > generatePacket(
-  //    const std::shared_ptr< BasePayloadStruct > &payload, bool ack);
+  std::vector< uint8_t > generate_command(commands command, bool ack = false);
 };
 
 }  // namespace KFlyTelemetry
-
-
