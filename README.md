@@ -14,9 +14,8 @@ Description: https://en.wikipedia.org/wiki/Serial_Line_Internet_Protocol
 
 ## License
 
-Licensed under the LGPL-v3 license, see LICENSE file for details.
+Licensed under the Boost Software License 1.0, see LICENSE file for details.
 
 ---
 
 * Simple to use, see example file.
-* Compile example: `g++ example.cpp -o test -std=c++11`

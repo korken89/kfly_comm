@@ -1,29 +1,16 @@
-/****************************************************************************
-*
-* Copyright (C) 2016 Emil Fresk.
-* All rights reserved.
-*
-* This file is part of the KFly Telemetry library.
-*
-* GNU Lesser General Public License Usage
-* This file may be used under the terms of the GNU Lesser
-* General Public License version 3.0 as published by the Free Software
-* Foundation and appearing in the file LICENSE included in the
-* packaging of this file.  Please review the following information to
-* ensure the GNU Lesser General Public License version 3.0 requirements
-* will be met: http://www.gnu.org/licenses/lgpl-3.0.html.
-*
-* If you have questions regarding the use of this file, please contact
-* Emil Fresk at emil.fresk@gmail.com.
-*
-****************************************************************************/
+//          Copyright Emil Fresk 2016 - 2017
+// Distributed under the Boost Software License, Version 1.0.
+//    (See accompanying file LICENSE_1_0.txt or copy at
+//          http://www.boost.org/LICENSE_1_0.txt)
 
 #ifndef _KFLY_ENUMS_H
 #define _KFLY_ENUMS_H
 
 #include <cstdint>
 
-namespace KFlyTelemetryPayload
+namespace kfly_comm
+{
+namespace enums
 {
 
 /* @brief The available flight modes via computer control. */
@@ -196,6 +183,7 @@ enum class Arming_Stick_Direction : uint8_t
     NON_LATCHING_SWITCH
 };
 
-} // namespace KFlyTelemetryPayload
+} // namespace enums
+} // namespace kfly_comm
 
 #endif
