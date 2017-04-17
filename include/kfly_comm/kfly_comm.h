@@ -91,6 +91,12 @@ public:
     _callbacks.register_callback(callback);
   }
 
+  // template < class ClassName, typename Datagram >
+  // void register_callback(ClassName *c, void (ClassName::*callback)(Datagram))
+  // {
+  //   _callbacks.register_callback(reinterpret_cast<void (*)(Datagram)>(c->*callback));
+  // }
+
   /**
    * @brief   Unregister a callback from the queue.
    *
