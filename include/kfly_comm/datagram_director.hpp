@@ -9,6 +9,93 @@
 #include <algorithm>
 #include <tuple>
 #include <mutex>
+#include <exception>
+
+namespace details
+{
+/**
+ * @brief   A wrapper class for function pointers and method pointers.
+ *
+ * @tparam Datagram   The datagram type,
+ */
+template < typename Datagram >
+class DatagramCallback
+{
+private:
+  /**
+   * @brief   Function object holding the callback.
+   */
+  std::function< void(Datagram) > _callback;
+
+  /**
+   * @brief   Meta functions to check if a type is registered in the datagram
+   */
+  void* _target;
+
+public:
+  /**
+   * @brief   Constructor, creates the callback from a method pointer.
+   *
+   * @param[in] obj       Object from which the callback is defined.
+   * @param[in] callback  Method pointer to register.
+   *
+   * @tparam Object       Type of the Object.
+   */
+  template < typename Object >
+  DatagramCallback(Object* obj, void (Object::*callback)(Datagram))
+      : _target(obj)
+  {
+    if (obj == nullptr)
+      throw std::invalid_argument("Datagram callback may not be a nullptr.");
+
+    _callback = std::bind(callback, obj, std::placeholders::_1);
+  }
+
+  /**
+   * @brief   Constructor, creates the callback from a function pointer.
+   *
+   * @param[in] fp    Function pointer to register.
+   */
+  DatagramCallback(void (*fp)(Datagram))
+      : _target(reinterpret_cast< void* >(fp))
+  {
+    if (fp == nullptr)
+      throw std::invalid_argument("Datagram callback may not be a nullptr.");
+
+    _callback = fp;
+  }
+
+  /**
+   * @brief   Equality comparison operator.
+   *
+   * @param[in] rhs    DatagramCallback to compare with.
+   */
+  bool operator==(DatagramCallback<Datagram>& rhs) const noexcept
+  {
+    return (_target == rhs.target);
+  }
+
+  /**
+   * @brief   Inequality comparison operator.
+   *
+   * @param[in] rhs    DatagramCallback to compare with.
+   */
+  bool operator!=(DatagramCallback<Datagram>& rhs) const noexcept
+  {
+    return (_target != rhs.target);
+  }
+
+  /**
+   * @brief   Execute the callback.
+   *
+   * @param[in] d     Datagram to send to the callback.
+   */
+  void operator()(Datagram d) const
+  {
+    _callback(d);
+  }
+};
+}
 
 /**
  * @brief     A class which registers and directs callbacks based on datagram
@@ -79,6 +166,23 @@ private:
   using function_ptr = void (*)(Datagram);
 
   /**
+   * @brief   Method pointer alias.
+   *
+   * @tparam Object    Type of the object.
+   * @tparam Datagram  Type of the datagram.
+   */
+  template < typename Object, typename Datagram >
+  using method_ptr = void (Object::*)(Datagram);
+
+  /**
+   * @brief   Alias for the callback wrapper.
+   *
+   * @tparam Datagram  Type of the datagram.
+   */
+  template < typename Datagram >
+  using callback_wrapper = details::DatagramCallback< Datagram >;
+
+  /**
    * @brief   Helper alias to define the callback tuple elements.
    *
    * @details Each tuple element consists of a list of function pointers to
@@ -89,7 +193,7 @@ private:
    */
   template < typename Datagram >
   using make_element =
-      std::pair< std::vector< function_ptr< Datagram > >, std::mutex >;
+      std::pair< std::vector< callback_wrapper< Datagram > >, std::mutex >;
 
   /**
    * @brief   The tuple which contains the lists of function pointers and
@@ -97,47 +201,41 @@ private:
    */
   std::tuple< make_element< Datagrams >... > _callbacks;
 
-public:
   /**
-   * @brief   Registers a function pointer to its corresponding datagram
+   * @brief   Registers a callback wrapper to its corresponding datagram
    *          callback.
    *
-   * @param[in] fun   The function pointer to register.
+   * @param[in] cw      The callback wrapper to register.
    *
    * @tparam Datagram   Type of the datagram for this tuple element.
    */
   template < typename Datagram >
-  void register_callback(function_ptr< Datagram > callback)
+  void register_callback(callback_wrapper< Datagram >&& callback)
   {
     /* Check to the Datagram exists in the tuple. */
     static_assert(exists< Datagram, Datagrams... >::value == true,
                   "The provided datagram is not registered.");
 
     /* Do a nullptr check. */
-    if (callback == nullptr)
-      return;
-    else
-    {
-      /* Get the corresponding datagram's mutex and lock it. */
-      std::lock_guard< std::mutex > lock(
-          std::get< make_element< Datagram > >(_callbacks).second);
+    /* Get the corresponding datagram's mutex and lock it. */
+    std::lock_guard< std::mutex > lock(
+        std::get< make_element< Datagram > >(_callbacks).second);
 
-      /* Emplace the callback in the corresponding callback vector. */
-      std::get< make_element< Datagram > >(_callbacks)
-          .first.emplace_back(callback);
-    }
+    /* Emplace the callback in the corresponding callback vector. */
+    std::get< make_element< Datagram > >(_callbacks)
+        .first.emplace_back(std::move(callback));
   }
 
   /**
-   * @brief   Releases a function pointer from its corresponding datagram
+   * @brief   Releases a callback wrapper from its corresponding datagram
    *          callback.
    *
-   * @param[in] fun   The function pointer to release.
+   * @param[in] cw      The callback wrapper to release.
    *
    * @tparam Datagram   Type of the datagram for this tuple element.
    */
   template < typename Datagram >
-  void release_callback(function_ptr< Datagram > callback)
+  void release_callback(callback_wrapper< Datagram > cw)
   {
     /* Check to the Datagram exists in the tuple. */
     static_assert(exists< Datagram, Datagrams... >::value == true,
@@ -148,13 +246,74 @@ public:
         std::get< make_element< Datagram > >(_callbacks).second);
 
     /* Get the callback list, and delete the requested callback. */
-    auto &callbacks = std::get< make_element< Datagram > >(_callbacks).first;
+    auto& callbacks = std::get< make_element< Datagram > >(_callbacks).first;
 
     callbacks.erase(std::remove_if(callbacks.begin(), callbacks.end(),
-                                   [&](function_ptr< Datagram > l_cb) {
-                                     return callback == l_cb;
+                                   [&](callback_wrapper< Datagram > l_cb) {
+                                     return cw == l_cb;
                                    }),
                     callbacks.end());
+  }
+
+public:
+  /**
+   * @brief   Registers a function pointer to its corresponding datagram
+   *          callback.
+   *
+   * @param[in] fun   The function pointer to register.
+   *
+   * @tparam Datagram   Type of the datagram.
+   */
+  template < typename Datagram >
+  void register_callback(function_ptr< Datagram > fun)
+  {
+    register_callback(callback_wrapper< Datagram >(fun));
+  }
+
+  /**
+   * @brief   Registers a function pointer to its corresponding datagram
+   *          callback.
+   *
+   * @param[in] obj   The object pointer to register.
+   * @param[in] mf    The method pointer to register.
+   *
+   * @tparam Obejct     Type of the object in which the callback exists.
+   * @tparam Datagram   Type of the datagram.
+   */
+  template < typename Object, typename Datagram >
+  void register_callback(Object* obj, method_ptr< Object, Datagram > mf)
+  {
+    register_callback(callback_wrapper< Datagram >(obj, mf));
+  }
+
+  /**
+   * @brief   Releases a function pointer from its corresponding datagram
+   *          callback.
+   *
+   * @param[in] cw      The function pointer to release.
+   *
+   * @tparam Datagram   Type of the datagram.
+   */
+  template < typename Datagram >
+  void release_callback(function_ptr< Datagram > fun)
+  {
+    release_callback(callback_wrapper< Datagram >(fun));
+  }
+
+  /**
+   * @brief   Releases a method pointer from its corresponding datagram
+   *          callback.
+   *
+   * @param[in] obj   The object pointer to register.
+   * @param[in] mf    The method pointer to register.
+   *
+   * @tparam Obejct     Type of the object in which the callback exists.
+   * @tparam Datagram   Type of the datagram.
+   */
+  template < typename Object, typename Datagram >
+  void release_callback(Object* obj, method_ptr< Object, Datagram > mf)
+  {
+    release_callback(callback_wrapper< Datagram >(obj, mf));
   }
 
   /**
@@ -165,7 +324,7 @@ public:
    * @tparam Datagram   Type of the datagram for this tuple element.
    */
   template < typename Datagram >
-  void execute_callback(const Datagram &data)
+  void execute_callback(const Datagram& data)
   {
     /* Get the corresponding datagram's mutex and lock it. */
     std::lock_guard< std::mutex > lock(

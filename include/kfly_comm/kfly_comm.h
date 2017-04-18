@@ -91,11 +91,19 @@ public:
     _callbacks.register_callback(callback);
   }
 
-  // template < class ClassName, typename Datagram >
-  // void register_callback(ClassName *c, void (ClassName::*callback)(Datagram))
-  // {
-  //   _callbacks.register_callback(reinterpret_cast<void (*)(Datagram)>(c->*callback));
-  // }
+  /**
+   * @brief   Register a callback.
+   *
+   * @param[in] object    The object owning the method.
+   * @param[in] callback  The method to register.
+   *
+   * @note    Shall be of the form void(kfly_comm::datagrams::xxx).
+   */
+  template < class Object, typename Datagram >
+  void register_callback(Object *obj, void (Object::*callback)(Datagram))
+  {
+    _callbacks.register_callback(obj, callback);
+  }
 
   /**
    * @brief   Unregister a callback from the queue.
@@ -106,6 +114,18 @@ public:
   void release_callback(void (*callback)(Datagram))
   {
     _callbacks.release_callback(callback);
+  }
+
+  /**
+   * @brief   Unregister a callback from the queue.
+   *
+   * @param[in] object    The object owning the method.
+   * @param[in] callback  The method to release.
+   */
+  template < class Object, typename Datagram >
+  void release_callback(Object *obj, void (Object::*callback)(Datagram))
+  {
+    _callbacks.release_callback(obj, callback);
   }
 
   /**
