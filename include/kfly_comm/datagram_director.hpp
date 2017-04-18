@@ -47,21 +47,21 @@ private:
    * @brief   Meta functions to check if a type is registered in the datagram
    *          director.
    */
-  template <typename Comp, typename T, typename... Ts>
+  template < typename Comp, typename T, typename... Ts >
   struct exists
+      : std::integral_constant< bool, std::is_same< Comp, T >::value |
+                                          exists< Comp, Ts... >::value >
   {
-    static constexpr const bool value =
-      std::is_same<Comp, T>::value | exists<Comp, Ts...>::value;
   };
 
   /**
    * @brief   Meta functions to check if a type is registered in the datagram
    *          director.
    */
-  template <typename Comp, typename T>
-  struct exists<Comp, T>
+  template < typename Comp, typename T >
+  struct exists< Comp, T >
+      : std::integral_constant< bool, std::is_same< Comp, T >::value >
   {
-    static constexpr const bool value = std::is_same<Comp, T>::value;
   };
 
   /**
@@ -97,7 +97,6 @@ private:
    */
   std::tuple< make_element< Datagrams >... > _callbacks;
 
-
 public:
   /**
    * @brief   Registers a function pointer to its corresponding datagram
@@ -111,7 +110,7 @@ public:
   void register_callback(function_ptr< Datagram > callback)
   {
     /* Check to the Datagram exists in the tuple. */
-    static_assert(exists<Datagram, Datagrams...>::value == true,
+    static_assert(exists< Datagram, Datagrams... >::value == true,
                   "The provided datagram is not registered.");
 
     /* Do a nullptr check. */
@@ -141,7 +140,7 @@ public:
   void release_callback(function_ptr< Datagram > callback)
   {
     /* Check to the Datagram exists in the tuple. */
-    static_assert(exists<Datagram, Datagrams...>::value == true,
+    static_assert(exists< Datagram, Datagrams... >::value == true,
                   "The provided datagram is not registered.");
 
     /* Get the corresponding datagram's mutex and lock it. */
@@ -177,4 +176,3 @@ public:
       callback(data);
   }
 };
-
