@@ -91,10 +91,17 @@ void codec::transmit_datagram(const uint8_t cmd,
               .get_datagram());
       break;
 
-    case commands::GetSystemInformation:
+    case commands::GetSystemStrings:
 
       _callbacks.execute_callback(
-          serializable_datagram< datagrams::SystemInformation >(payload)
+          serializable_datagram< datagrams::SystemStrings >(payload)
+              .get_datagram());
+      break;
+
+    case commands::GetSystemStatus:
+
+      _callbacks.execute_callback(
+          serializable_datagram< datagrams::SystemStatus >(payload)
               .get_datagram());
       break;
 
