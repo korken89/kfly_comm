@@ -11,10 +11,11 @@ using namespace std;
 
 void test_ping(kfly_comm::datagrams::Ping);
 
-struct test
+struct callback_object
 {
-  void callback(kfly_comm::datagrams::SystemStatus)
+  void cb_ping(kfly_comm::datagrams::Ping)
   {
+    cout << "Got Ping (obj)!!!\n";
   }
 };
 
@@ -23,18 +24,23 @@ int main()
   /* Create a KFly Telemetry object. */
   kfly_comm::codec kft;
 
-
-  test t_obj;
-
+  callback_object cbo;
 
   /* Register a callback. */
   kft.register_callback(test_ping);
-  kft.register_callback(&t_obj, &test::callback);
+  kft.register_callback(&cbo, &callback_object::cb_ping);
 
   /* Generate a test message (PING). */
   auto testPayload = kft.generate_command(kfly_comm::commands::Ping);
 
   /* Test the parser. */
+  kft.parse(testPayload);
+
+  /* Remove callbacks */
+  kft.release_callback(test_ping);
+  kft.release_callback(&cbo, &callback_object::cb_ping);
+
+  /* Test the parser (should give no output). */
   kft.parse(testPayload);
 
   /* Create a message for generation. */

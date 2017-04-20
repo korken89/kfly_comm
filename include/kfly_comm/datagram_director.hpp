@@ -54,8 +54,8 @@ private:
   /**
    * @brief   Void pointer
    */
-  const void* _target;
-  const std::size_t _method_hash;
+  void* _target;
+  std::size_t _method_hash;
 
 public:
   /**
