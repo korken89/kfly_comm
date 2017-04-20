@@ -11,14 +11,25 @@ using namespace std;
 
 void test_ping(kfly_comm::datagrams::Ping);
 
+struct test
+{
+  void callback(kfly_comm::datagrams::SystemStatus)
+  {
+  }
+};
+
 int main()
 {
   /* Create a KFly Telemetry object. */
   kfly_comm::codec kft;
 
 
+  test t_obj;
+
+
   /* Register a callback. */
   kft.register_callback(test_ping);
+  kft.register_callback(&t_obj, &test::callback);
 
   /* Generate a test message (PING). */
   auto testPayload = kft.generate_command(kfly_comm::commands::Ping);

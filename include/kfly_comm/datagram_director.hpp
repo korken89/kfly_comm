@@ -10,9 +10,33 @@
 #include <tuple>
 #include <mutex>
 #include <exception>
+#include <functional>
 
 namespace details
 {
+/**
+ * @brief   A hashing function for method pointers.
+ */
+template < typename T, typename R, typename... Args >
+std::size_t method_ptr_hash(R (T::*f)(Args...))
+{
+  static_assert(sizeof(void * [2]) == sizeof(R(T::*)(Args...)), "Size error");
+
+  union {
+    R (T::*pf)(Args...);
+    std::array< unsigned char, sizeof(R (T::*)(Args...))> p;
+  };
+
+  pf = f;
+
+  std::size_t hash_value = 104395301;
+
+  for (auto value : p)
+    hash_value += (value * 2654435789) ^ (hash_value >> 23);
+
+  return hash_value ^ (hash_value << 37);;
+}
+
 /**
  * @brief   A wrapper class for function pointers and method pointers.
  *
@@ -28,9 +52,10 @@ private:
   std::function< void(Datagram) > _callback;
 
   /**
-   * @brief   Meta functions to check if a type is registered in the datagram
+   * @brief   Void pointer
    */
-  void* _target;
+  const void* _target;
+  const std::size_t _method_hash;
 
 public:
   /**
@@ -43,7 +68,7 @@ public:
    */
   template < typename Object >
   DatagramCallback(Object* obj, void (Object::*callback)(Datagram))
-      : _target(obj)
+      : _target(obj), _method_hash(method_ptr_hash(callback))
   {
     if (obj == nullptr)
       throw std::invalid_argument("Datagram callback may not be a nullptr.");
@@ -57,7 +82,7 @@ public:
    * @param[in] fp    Function pointer to register.
    */
   DatagramCallback(void (*fp)(Datagram))
-      : _target(reinterpret_cast< void* >(fp))
+      : _target(reinterpret_cast< void* >(fp)), _method_hash(0)
   {
     if (fp == nullptr)
       throw std::invalid_argument("Datagram callback may not be a nullptr.");
@@ -70,9 +95,12 @@ public:
    *
    * @param[in] rhs    DatagramCallback to compare with.
    */
-  bool operator==(DatagramCallback<Datagram>& rhs) const noexcept
+  bool operator==(DatagramCallback& rhs) const noexcept
   {
-    return (_target == rhs.target);
+    if (_method_hash == 0)  // Function pointer case
+      return (_target == rhs._target);
+    else  // Method pointer case
+      return (_target == rhs._target && _method_hash == rhs._method_hash);
   }
 
   /**
@@ -80,9 +108,12 @@ public:
    *
    * @param[in] rhs    DatagramCallback to compare with.
    */
-  bool operator!=(DatagramCallback<Datagram>& rhs) const noexcept
+  bool operator!=(DatagramCallback& rhs) const noexcept
   {
-    return (_target != rhs.target);
+    if (_method_hash == 0)  // Function pointer case
+      return (_target != rhs._target);
+    else  // Method pointer case
+      return (_target != rhs._target || _method_hash != rhs._method_hash);
   }
 
   /**
