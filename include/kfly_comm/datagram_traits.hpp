@@ -43,8 +43,14 @@ struct get_packet_command< datagrams::ManageSubscription >
 };
 
 template <>
-struct get_packet_command< datagrams::SystemInformation >
-    : std::integral_constant< commands, commands::GetSystemInformation >
+struct get_packet_command< datagrams::SystemStatus >
+    : std::integral_constant< commands, commands::GetSystemStatus >
+{
+};
+
+template <>
+struct get_packet_command< datagrams::SystemStrings >
+    : std::integral_constant< commands, commands::GetSystemStrings >
 {
 };
 

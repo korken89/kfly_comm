@@ -43,9 +43,13 @@ enum class commands : uint8_t
   /*===============================================*/
 
   /**
-   * @brief   Get system information.
+   * @brief   Get system strings.
    */
-  GetSystemInformation = 17,
+  GetSystemStrings = 16,
+  /**
+   * @brief   Get system status.
+   */
+  GetSystemStatus = 17,
   /**
    * @brief   Set the user definable ID strings.
    */

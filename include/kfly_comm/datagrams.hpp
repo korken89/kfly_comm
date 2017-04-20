@@ -58,7 +58,7 @@ struct ManageSubscription
 };
 
 /* @brief Version strings and unique identifiers. */
-struct SystemInformation
+struct SystemStrings
 {
   /*========================*/
   /* Identification         */
@@ -83,7 +83,11 @@ struct SystemInformation
    * @brief   KFly and Git compile string.
    */
   char kfly_version[96];
+};
 
+/* @brief System status information. */
+struct SystemStatus
+{
   /*========================*/
   /* General info           */
   /*========================*/
