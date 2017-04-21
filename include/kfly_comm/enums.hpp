@@ -106,7 +106,7 @@ enum class RCInput_Type : uint8_t
 };
 
 /* @brief Input capture channel type. */
-enum class RCInput_Mode : uint16_t
+enum class RCInput_Mode : uint8_t
 {
     /* @brief Analog type input. */
     MODE_CPPM_INPUT = 1,

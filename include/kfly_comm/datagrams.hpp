@@ -236,10 +236,14 @@ struct ChannelMix
 /* @brief Settings structure for the RC inputs. */
 struct RCInputSettings
 {
-  /* @brief If the receiver is in CPPM or PWM mode. */
-  enums::RCInput_Mode mode;
+  /* @brief The top value of the RC input (generally around 2000). */
+  uint16_t ch_top[12];
 
-  uint16_t use_rssi;
+  /* @brief The center value of the RC input (generally around 1500). */
+  uint16_t ch_center[12];
+
+  /* @brief The bottom value of the RC input (generally around 1000). */
+  uint16_t ch_bottom[12];
 
   /* @brief Each channels' input role. */
   enums::RCInput_Role role[12];
@@ -250,14 +254,11 @@ struct RCInputSettings
   /* @brief Flag to reverse a channel. */
   bool ch_reverse[12];
 
-  /* @brief The top value of the RC input (generally around 2000). */
-  uint16_t ch_top[12];
+  /* @brief If the receiver is in CPPM or PWM mode. */
+  enums::RCInput_Mode mode;
 
-  /* @brief The center value of the RC input (generally around 1500). */
-  uint16_t ch_center[12];
-
-  /* @brief The bottom value of the RC input (generally around 1000). */
-  uint16_t ch_bottom[12];
+  /* @brief Enable/disable RSSI usage. */
+  bool use_rssi;
 };
 
 /* @brief Settings structure for the RC inputs. */
