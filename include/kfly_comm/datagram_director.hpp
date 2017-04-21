@@ -11,6 +11,7 @@
 #include <mutex>
 #include <exception>
 #include <functional>
+#include <string>
 
 namespace details
 {
@@ -20,21 +21,17 @@ namespace details
 template < typename T, typename R, typename... Args >
 std::size_t method_ptr_hash(R (T::*f)(Args...))
 {
-  static_assert(sizeof(void * [2]) == sizeof(R(T::*)(Args...)), "Size error");
-
+  /* The method pointer has not the same size as a void*, make generic. */
   union {
     R (T::*pf)(Args...);
-    std::array< unsigned char, sizeof(R (T::*)(Args...))> p;
+    std::array< char, sizeof(R (T::*)(Args...)) > p;
   };
 
+  /* Save the pointer. */
   pf = f;
 
-  std::size_t hash_value = 104395301;
-
-  for (auto value : p)
-    hash_value += (value * 2654435789) ^ (hash_value >> 23);
-
-  return hash_value ^ (hash_value << 37);;
+  /* Hash whatever is inside the pointer. */
+  return std::hash< std::string >{}(std::string(p.data(), p.size()));
 }
 
 /**
