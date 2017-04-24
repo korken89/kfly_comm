@@ -277,6 +277,12 @@ struct RCOutputSettings
 /* @brief The values and status of the RC input. */
 struct RCValues
 {
+  /* @brief The calibrated input value of each channel. */
+  float calibrated_value[12];
+
+  /* @brief Input switch states. */
+  enums::RCInput_Switch_Position switches[3];
+
   /* @brief Number of active inputs (all 12 might not be used). */
   uint16_t num_connections;
 
@@ -288,12 +294,6 @@ struct RCValues
 
   /* @brief The frequency of the RSSI PWM. */
   uint16_t rssi_frequency;
-
-  /* @brief The calibrated input value of each channel. */
-  float calibrated_value[12];
-
-  /* @brief Input switch states. */
-  enums::RCInput_Switch_Position switches[3];
 
   /* @brief Active connection indicator. */
   bool active_connection;
