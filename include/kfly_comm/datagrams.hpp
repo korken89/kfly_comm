@@ -277,9 +277,6 @@ struct RCOutputSettings
 /* @brief The values and status of the RC input. */
 struct RCValues
 {
-  /* @brief Active connection indicator. */
-  uint32_t active_connection;
-
   /* @brief Number of active inputs (all 12 might not be used). */
   uint16_t num_connections;
 
@@ -297,6 +294,9 @@ struct RCValues
 
   /* @brief Input switch states. */
   enums::RCInput_Switch_Position switches[3];
+
+  /* @brief Active connection indicator. */
+  bool active_connection;
 };
 
 /* @brief Calibrated sensor data structure. */
