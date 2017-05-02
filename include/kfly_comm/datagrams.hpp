@@ -24,6 +24,36 @@ namespace datagrams
 
 #pragma pack(push, 1)
 
+/** @brief   3 dimensional vector definition. */
+struct vector3f_t
+{
+    /** @brief   x component. */
+    float x;
+
+    /** @brief   y component. */
+    float y;
+
+    /** @brief   z component. */
+    float z;
+};
+
+/** @brief   Quaternion definition. */
+struct quaternion_t
+{
+    /** @brief   Scalar component. */
+    float w;
+
+    /** @brief   i component. */
+    float x;
+
+    /** @brief   j component. */
+    float y;
+
+    /** @brief   k component. */
+    float z;
+};
+
+
 /* @brief Ack. */
 struct Ack
 {
@@ -144,6 +174,48 @@ struct SetDeviceStrings
     std::strncpy(_vehicle_name, vehicle_name.c_str(), 48);
     std::strncpy(_vehicle_type, vehicle_type.c_str(), 48);
   }
+};
+
+/**
+ * @brief   Settings for the motor override, used for ESC calibration
+ *          and motor testing.
+ */
+struct MotorOverride
+{
+    /** @brief   Holds the motor override thrust values. */
+    float values[8];
+
+    /** @brief   Timeout counter for the override command. */
+    int timeout;
+
+    /** @brief   Flag if the motor override is active. */
+    bool active;
+};
+
+/** @brief   Structure moving control signals. */
+struct ControlSignals
+{
+    /** @brief   Current throttle value. */
+    float throttle;
+
+    /** @brief   Current torque request. */
+    vector3f_t torque;
+
+    /** @brief   Current motor commands. */
+    float motor_command[8];
+};
+
+/** @brief   Structure for control references. */
+struct ControllerReferences
+{
+    /** @brief   Current requested attitude. */
+    quaternion_t attitude;
+
+    /** @brief   Current requested rate. */
+    vector3f_t rate;
+
+    /** @brief   Current throttle. */
+    float throttle;
 };
 
 /* @brief All limits in the control system. */
@@ -368,13 +440,13 @@ struct IMUCalibration
 struct EstimationAttitude
 {
   /* @brief Quaternion containing attitude. */
-  float qw, qx, qy, qz;
+  quaternion_t q;
 
   /* @brief Angular rates in [rad/s]. */
-  float angular_rate[3];
+  vector3f_t angular_rate;
 
   /* @brief Angular rate biases in [rad/s]. */
-  float rate_bias[3];
+  vector3f_t rate_bias;
 };
 
 /* @brief Computer control data. */

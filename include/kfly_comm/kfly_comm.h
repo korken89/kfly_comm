@@ -49,13 +49,14 @@ private:
       datagrams::Ack, datagrams::Ping, datagrams::RunningMode,
       datagrams::ManageSubscription, datagrams::SystemStrings,
       datagrams::SystemStatus, datagrams::SetDeviceStrings,
-      datagrams::ControllerLimits, datagrams::ArmSettings,
-      datagrams::RateControllerData, datagrams::AttitudeControllerData,
-      datagrams::ChannelMix, datagrams::RCInputSettings,
-      datagrams::RCOutputSettings, datagrams::RCValues, datagrams::IMUData,
-      datagrams::RawIMUData, datagrams::IMUCalibration,
-      datagrams::EstimationAttitude, datagrams::ComputerControlReference,
-      datagrams::MotionCaptureFrame >
+      datagrams::MotorOverride, datagrams::ControlSignals,
+      datagrams::ControllerReferences, datagrams::ControllerLimits,
+      datagrams::ArmSettings, datagrams::RateControllerData,
+      datagrams::AttitudeControllerData, datagrams::ChannelMix,
+      datagrams::RCInputSettings, datagrams::RCOutputSettings,
+      datagrams::RCValues, datagrams::IMUData, datagrams::RawIMUData,
+      datagrams::IMUCalibration, datagrams::EstimationAttitude,
+      datagrams::ComputerControlReference, datagrams::MotionCaptureFrame >
       _callbacks;
 
   /**

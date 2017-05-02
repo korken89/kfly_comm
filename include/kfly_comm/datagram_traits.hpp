@@ -61,6 +61,12 @@ struct get_packet_command< datagrams::SetDeviceStrings >
 };
 
 template <>
+struct get_packet_command< datagrams::MotorOverride >
+    : std::integral_constant< commands, commands::MotorOverride >
+{
+};
+
+template <>
 struct get_packet_command< datagrams::ControllerLimits >
     : std::integral_constant< commands, commands::SetControllerLimits >
 {

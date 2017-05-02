@@ -9,7 +9,6 @@
 
 namespace kfly_comm
 {
-
 /* Command are from the view of KFly. */
 enum class commands : uint8_t
 {
@@ -67,6 +66,18 @@ enum class commands : uint8_t
   /* Controller specific commands.                 */
   /*===============================================*/
 
+  /**
+   * @brief   Motor override command for ESC calibration.
+   */
+  MotorOverride = 23,
+  /**
+   * @brief   Get controller references (quaternion and rate).
+   */
+  GetControllerReferences = 24,
+  /**
+   * @brief   Get control signals (actuator desired).
+   */
+  GetControlSignals = 25,
   /**
    * @brief   Get contreller settings.
    */
@@ -218,4 +229,3 @@ enum class commands : uint8_t
   MotionCaptureMeasurement = 127
 };
 }
-
