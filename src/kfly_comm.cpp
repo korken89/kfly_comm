@@ -105,6 +105,20 @@ void codec::transmit_datagram(const uint8_t cmd,
               .get_datagram());
       break;
 
+    case commands::GetControlSignals:
+
+      _callbacks.execute_callback(
+          serializable_datagram< datagrams::ControlSignals >(payload)
+              .get_datagram());
+      break;
+
+    case commands::GetControllerReferences:
+
+      _callbacks.execute_callback(
+          serializable_datagram< datagrams::ControllerReferences >(payload)
+              .get_datagram());
+      break;
+
     case commands::GetControllerLimits:
 
       _callbacks.execute_callback(
@@ -157,15 +171,13 @@ void codec::transmit_datagram(const uint8_t cmd,
     case commands::GetRCValues:
 
       _callbacks.execute_callback(
-          serializable_datagram< datagrams::RCValues >(payload)
-              .get_datagram());
+          serializable_datagram< datagrams::RCValues >(payload).get_datagram());
       break;
 
     case commands::GetIMUData:
 
       _callbacks.execute_callback(
-          serializable_datagram< datagrams::IMUData >(payload)
-              .get_datagram());
+          serializable_datagram< datagrams::IMUData >(payload).get_datagram());
       break;
 
     case commands::GetRawIMUData:
@@ -232,10 +244,9 @@ std::vector< uint8_t > codec::generate_command(commands command, bool ack)
   auto packet =
       kfly_packet< datagrams::Ack, false >(command, datagrams::Ack{}, ack);
 
-  std::vector<uint8_t> out;
+  std::vector< uint8_t > out;
   kfly_parser::encode(packet.payload, out);
 
   return out;
 }
-
 }
