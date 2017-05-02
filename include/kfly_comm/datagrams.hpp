@@ -162,7 +162,7 @@ struct SystemStatus
   bool serial_interface_enabled;
 };
 
-/* @brief Set the user ID strings. */
+/** @brief Set the user ID strings. */
 struct SetDeviceStrings
 {
   /* @brief Value of the user ID string. */
@@ -176,20 +176,11 @@ struct SetDeviceStrings
   }
 };
 
-/**
- * @brief   Settings for the motor override, used for ESC calibration
- *          and motor testing.
- */
+/** @brief   Motor override, used for ESC calibration and motor testing. */
 struct MotorOverride
 {
     /** @brief   Holds the motor override thrust values. */
     float values[8];
-
-    /** @brief   Timeout counter for the override command. */
-    int timeout;
-
-    /** @brief   Flag if the motor override is active. */
-    bool active;
 };
 
 /** @brief   Structure moving control signals. */
