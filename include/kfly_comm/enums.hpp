@@ -105,14 +105,17 @@ enum class RCInput_Type : uint8_t
     TYPE_ON_OFF = 3
 };
 
-/* @brief Input capture channel type. */
+/* @brief Input capture type selector. */
 enum class RCInput_Mode : uint8_t
 {
-    /* @brief Analog type input. */
+    /** @brief   No mode. */
+    MODE_NONE = 0,
+
+    /** @brief   CPPM input: all channels on one input line. */
     MODE_CPPM_INPUT = 1,
 
-    /* @brief 3-state type input. */
-    MODE_PWM_INPUT = 2
+    /** @brief   SBUS input: serial input */
+    MODE_SBUS_INPUT = 2
 };
 
 /* @brief Input switch states. */

@@ -317,9 +317,6 @@ struct RCInputSettings
   /* @brief Flag to reverse a channel. */
   bool ch_reverse[12];
 
-  /* @brief If the receiver is in CPPM or PWM mode. */
-  enums::RCInput_Mode mode;
-
   /* @brief Enable/disable RSSI usage. */
   bool use_rssi;
 };
@@ -360,6 +357,9 @@ struct RCValues
 
   /* @brief The frequency of the RSSI PWM. */
   uint16_t rssi_frequency;
+
+  /* @brief If the receiver is in CPPM or PWM mode. */
+  enums::RCInput_Mode mode;
 };
 
 /* @brief Calibrated sensor data structure. */
