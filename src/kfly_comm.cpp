@@ -13,6 +13,10 @@ namespace kfly_comm
 
 void codec::parse_packet(const std::vector< uint8_t > &payload)
 {
+  /* Check size */
+  if (payload.size() < 4)
+      return;
+
   /* Extract command. */
   const uint8_t cmd = payload[0];
 
