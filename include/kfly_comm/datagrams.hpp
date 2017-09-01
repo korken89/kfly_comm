@@ -18,6 +18,9 @@ namespace kfly_comm
 {
 namespace datagrams
 {
+
+#define RCINPUT_N_CHANNELS          16
+
 /*****************************************************************************/
 /* NOTE!!! All structures bellow must be inside the #pragmas !!!             */
 /*****************************************************************************/
@@ -300,22 +303,22 @@ struct ChannelMix
 struct RCInputSettings
 {
   /* @brief The top value of the RC input (generally around 2000). */
-  uint16_t ch_top[12];
+  uint16_t ch_top[RCINPUT_N_CHANNELS];
 
   /* @brief The center value of the RC input (generally around 1500). */
-  uint16_t ch_center[12];
+  uint16_t ch_center[RCINPUT_N_CHANNELS];
 
   /* @brief The bottom value of the RC input (generally around 1000). */
-  uint16_t ch_bottom[12];
+  uint16_t ch_bottom[RCINPUT_N_CHANNELS];
 
   /* @brief Each channels' input role. */
-  enums::RCInput_Role role[12];
+  enums::RCInput_Role role[RCINPUT_N_CHANNELS];
 
   /* @brief Each channels' input type. */
-  enums::RCInput_Type type[12];
+  enums::RCInput_Type type[RCINPUT_N_CHANNELS];
 
   /* @brief Flag to reverse a channel. */
-  bool ch_reverse[12];
+  bool ch_reverse[RCINPUT_N_CHANNELS];
 
   /* @brief Enable/disable RSSI usage. */
   bool use_rssi;
@@ -338,7 +341,7 @@ struct RCOutputSettings
 struct RCValues
 {
   /* @brief The calibrated input value of each channel. */
-  float calibrated_value[12];
+  float calibrated_value[RCINPUT_N_CHANNELS];
 
   /* @brief Input switch states. */
   enums::RCInput_Switch_Position switches[3];
@@ -350,7 +353,7 @@ struct RCValues
   uint16_t num_connections;
 
   /* @brief The input value of each channel. */
-  uint16_t channel_value[12];
+  uint16_t channel_value[RCINPUT_N_CHANNELS];
 
   /* @brief The signal strength in percent. */
   uint16_t rssi;
