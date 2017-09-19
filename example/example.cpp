@@ -5,7 +5,7 @@
 
 #include <iostream>
 #include <iomanip>
-#include "kfly_comm/kfly_comm.h"
+#include "kfly_comm/kfly_comm.hpp"
 
 using namespace std;
 
