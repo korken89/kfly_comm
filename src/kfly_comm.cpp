@@ -3,7 +3,7 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#include "kfly_comm/kfly_comm.h"
+#include "kfly_comm/kfly_comm.hpp"
 
 namespace kfly_comm
 {
