@@ -475,6 +475,13 @@ struct ComputerControlReference
       float throttle;
     } rate;
 
+    /* @brief Attitude euler (Roll, Pitch, Yaw-rate) control data. */
+    struct
+    {
+      float roll, pitch, yaw_rate;
+      float throttle;
+    } attitude_euler;
+
     /* @brief Attitude control data. */
     struct
     {
