@@ -174,8 +174,16 @@ struct SetDeviceStrings
 
   void SetStrings(std::string vehicle_name, std::string vehicle_type)
   {
-    std::strncpy(_vehicle_name, vehicle_name.c_str(), 48);
-    std::strncpy(_vehicle_type, vehicle_type.c_str(), 48);
+    std::strncpy(_vehicle_name, vehicle_name.c_str(), 47);
+    _vehicle_name[47] = '\0';
+    std::strncpy(_vehicle_type, vehicle_type.c_str(), 47);
+    _vehicle_type[47] = '\0';
+  }
+
+  void SetStrings(const char* vehicle_name, const char* vehicle_type)
+  {
+    sprintf(_vehicle_name, "%.47s", vehicle_name);
+    sprintf(_vehicle_type, "%.47s", vehicle_type);
   }
 };
 
