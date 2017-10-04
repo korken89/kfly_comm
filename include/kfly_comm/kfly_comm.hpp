@@ -166,6 +166,54 @@ public:
   }
 
   /**
+   * @brief   Generate a subscription for KFly.
+   *
+   * @param[in] cmd       The command to generate a subscription to.
+   * @param[in] dt_ms     The time between publishes of the command.
+   * @param[in] subscribe Flag to subscribe or un-subscribe.
+   * @param[in] port      The port on which the subscription will be published.
+   *
+   * @return A vector that holds the generated message.
+   */
+  static std::vector< uint8_t > generate_subscribe(
+      commands cmd, unsigned dt_ms, bool subscribe = true,
+      enums::Ports port = enums::Ports::PORT_SAME)
+  {
+    kfly_comm::datagrams::ManageSubscription sub;
+
+    sub.cmd = cmd;
+    sub.delta_ms = dt_ms;
+    sub.subscribe = subscribe;
+    sub.port = port;
+
+    return generate_packet(sub);
+  }
+
+  /**
+   * @brief   Special case for generating an un-subscription.
+   *
+   * @param[in] cmd   The command to generate an un-subscription to.
+   * @param[in] port  The port on which the un-subscription will have effect.
+   *
+   * @return A vector that holds the generated message.
+   */
+  static std::vector< uint8_t > generate_unsubscribe(
+      commands cmd, enums::Ports port = enums::Ports::PORT_SAME)
+  {
+    return generate_subscribe(cmd, 0, false, port);
+  }
+
+  /**
+   * @brief   Special case for clearing all subscriptions.
+   *
+   * @return A vector that holds the generated message.
+   */
+  static std::vector< uint8_t > generate_unsubscribe_all()
+  {
+    return generate_subscribe(commands::None, 0xffffffff, false);
+  }
+
+  /**
    * @brief   Converts a command (no datagram)to a byte message for
    *          transmission.
    *
