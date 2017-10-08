@@ -454,9 +454,6 @@ struct EstimationAttitude
 /* @brief Computer control data. */
 struct ComputerControlReference
 {
-  /* @brief Flight mode to differentiate the following data. */
-  enums::FlightMode mode;
-
   union {
     /* @brief Direct motor control data. */
     uint16_t direct_control[8];
@@ -489,6 +486,9 @@ struct ComputerControlReference
       float throttle;
     } attitude;
   };
+
+  /* @brief Flight mode to differentiate the following data. */
+  enums::FlightMode mode;
 };
 
 /* @brief Motion capture frame to KFly data, used for the internal estimation.
