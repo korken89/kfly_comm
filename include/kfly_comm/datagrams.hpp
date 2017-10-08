@@ -223,17 +223,28 @@ struct ControllerReferences
 /* @brief All limits in the control system. */
 struct ControllerLimits
 {
-  /* @brief Limits in radians/s, when in rate mode. */
+  /**
+   * @brief   Holder for the rate limits which builds up the exponential
+   *          response in manual mode and limits in automatic mode.
+   *
+   * @note    max_rate >= center_rate
+   * @note    Manual rate = stick * center_rate +
+   *                        stick^3 * (max_rate - center_rate)
+   */
   struct
   {
-    float roll, pitch, yaw;
-  } max_rate;
+    /** @brief   Holder for the rate limits in rad/s. */
+    struct
+    {
+      float roll, pitch, yaw;
+    } max_rate;
 
-  /* @brief Limits in radians/s, when in attitude mode. */
-  struct
-  {
-    float roll, pitch, yaw;
-  } max_rate_attitude;
+    /** @brief   Holder for the center linear rate in rad/s. */
+    struct
+    {
+      float roll, pitch, yaw;
+    } center_rate;
+  } max_rate;
 
   /* @brief Limits in radians, when in attitude mode or higher. */
   struct
