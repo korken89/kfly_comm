@@ -142,18 +142,15 @@ enum class RCInput_Switch_Position : uint8_t
  */
 enum class RCOutput_Mode : uint8_t
 {
-    /**
-     * @brief Output mode PWM @ 400 Hz.
-     */
-    RCOUTPUT_MODE_400HZ_PWM = 0,
-    /**
-     * @brief Output mode PWM @ 50 Hz.
-     */
-    RCOUTPUT_MODE_50HZ_PWM = 1,
-    /**
-     * @brief Output mode OPM (OneShot125).
-     */
-    RCOUTPUT_MODE_OPM = 2
+    RCOUTPUT_MODE_50HZ_PWM = 0,
+    RCOUTPUT_MODE_400HZ_PWM,
+    RCOUTPUT_MODE_ONESHOT125,
+    RCOUTPUT_MODE_ONESHOT42,
+    RCOUTPUT_MODE_MULTISHOT,
+    RCOUTPUT_MODE_DSHOT150,
+    RCOUTPUT_MODE_DSHOT300,
+    RCOUTPUT_MODE_DSHOT600,
+    RCOUTPUT_MODE_DSHOT1200,
 };
 
 /**
