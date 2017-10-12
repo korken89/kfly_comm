@@ -56,7 +56,8 @@ private:
       datagrams::RCInputSettings, datagrams::RCOutputSettings,
       datagrams::RCValues, datagrams::IMUData, datagrams::RawIMUData,
       datagrams::IMUCalibration, datagrams::EstimationAttitude,
-      datagrams::ComputerControlReference, datagrams::MotionCaptureFrame >
+      datagrams::ControlFilterSettings, datagrams::ComputerControlReference,
+      datagrams::MotionCaptureFrame >
       _callbacks;
 
   /**

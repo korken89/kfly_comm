@@ -286,20 +286,33 @@ struct ControllerData
   /* @brief Roll controller limits and gains. */
   struct
   {
-    float P_gain, I_gain;
+    float P_gain, I_gain, D_gain;
   } roll_controller;
 
   /* @brief Pitch controller limits and gains. */
   struct
   {
-    float P_gain, I_gain;
+    float P_gain, I_gain, D_gain;
   } pitch_controller;
 
   /* @brief Yaw controller limits and gains. */
   struct
   {
-    float P_gain, I_gain;
+    float P_gain, I_gain, D_gain;
   } yaw_controller;
+};
+
+/* @brief   Control filter settings structure. */
+struct ControlFilterSettings
+{
+    /**
+     * @brief   D-term filter cutoff (used for transferring settings)
+     */
+    float dterm_cutoff[3];
+    /**
+     * @brief   D-term filter type (used for transferring settings)
+     */
+    enums::BiquadMode dterm_filter_mode[3];
 };
 
 /* @brief Rate controller data. */

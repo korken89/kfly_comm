@@ -205,6 +205,13 @@ void codec::transmit_datagram(const uint8_t cmd,
               .get_datagram());
       break;
 
+    case commands::GetControlFilters:
+
+      _callbacks.execute_callback(
+          serializable_datagram< datagrams::ControlFilterSettings >(payload)
+              .get_datagram());
+      break;
+
     default:
       break;
   }

@@ -211,6 +211,19 @@ enum class commands : uint8_t
   ResetEstimation = 55,
 
   /*===============================================*/
+  /* Filter specific commands.                     */
+  /*===============================================*/
+
+  /**
+   * @brief   Get control filters.
+   */
+  GetControlFilters = 56,
+  /**
+   * @brief   Set control filters.
+   */
+  SetControlFilters = 57,
+
+  /*===============================================*/
   /* Computer control specific commands.           */
   /*===============================================*/
 

@@ -183,6 +183,25 @@ enum class Arming_Stick_Direction : uint8_t
     NON_LATCHING_SWITCH
 };
 
+/**
+ * @brief Supported biquad types.
+ */
+enum class BiquadType : uint8_t
+{
+    LPF,
+    HPF,
+    NOTCH
+};
+
+/**
+ * @brief Supported biquad modes.
+ */
+enum class BiquadMode : uint8_t
+{
+    BIQUAD, // 2nd order filter
+    PT1     // first order filter
+};
+
 } // namespace enums
 } // namespace kfly_comm
 
