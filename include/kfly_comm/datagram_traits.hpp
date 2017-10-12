@@ -115,6 +115,12 @@ struct get_packet_command< datagrams::IMUCalibration >
 };
 
 template <>
+struct get_packet_command< datagrams::ControlFilterSettings >
+    : std::integral_constant< commands, commands::SetControlFilters >
+{
+};
+
+template <>
 struct get_packet_command< datagrams::ComputerControlReference >
     : std::integral_constant< commands, commands::ComputerControlReference >
 {
